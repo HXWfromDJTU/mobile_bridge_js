@@ -1,0 +1,28 @@
+{
+  "name": "mobile_bridge_js",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "webpack": "^5.3.0",
+    "webpack-bundle-analyzer": "^3.9.0",
+    "webpack-merge": "^5.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:esm": "tsc -p tsconfig.esm.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HXWfromDJTU/mobile_bridge_js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/HXWfromDJTU/mobile_bridge_js/issues"
+  },
+  "homepage": "https://github.com/HXWfromDJTU/mobile_bridge_js#readme"
+}

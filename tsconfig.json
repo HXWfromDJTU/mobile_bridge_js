@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noImplicitThis": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "baseUrl": "./",
+    "declaration": true,
+    "declarationDir": "./types"
+  },
+  "include": [
+    "src"
+  ]
+}
