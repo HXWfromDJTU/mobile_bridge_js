@@ -6,3 +6,6 @@ export const JSON_RPC_KEY = 'jsonrpc'
 export const EXPIRE_DURATION = 3000
 
 export const NOTIFY_PREFIX = 'notify'
+
+// 检测通路的时隔
+export const HEARTBEAT_DURATION = 1000

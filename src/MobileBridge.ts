@@ -5,7 +5,14 @@ import pkg = require('../package.json')
 import { IframeChannel } from './channel/IframeChannel'
 import { Logger } from 'loglevel'
 import { isIframeEnv, isNotify, isRequest, isResponse } from './helper'
-import { EXPIRE_DURATION, JSON_RPC_KEY, JSON_RPC_VERSION, NOTIFY_PREFIX, SDK_NAME } from './constant'
+import {
+  EXPIRE_DURATION,
+  HEARTBEAT_DURATION,
+  JSON_RPC_KEY,
+  JSON_RPC_VERSION,
+  NOTIFY_PREFIX,
+  SDK_NAME
+} from './constant'
 import { RES_CODE } from './constant/rescode'
 import uniqueId from 'lodash-es/uniqueId'
 import api from './api'
@@ -16,7 +23,7 @@ export default class MobileBridge extends EventEmitter {
 
   protected _channel: IChannel
   protected _promises: Map<string, IPromise>
-  protected _timer: any
+  protected _roundTripTimer: number
 
   constructor() {
     super()
@@ -38,7 +45,21 @@ export default class MobileBridge extends EventEmitter {
       // 使用 native channel
     }
 
-    // 绑定 API
+    // 绑定 API 实例到 Bridge 上
+    for (const key of Object.keys(api)) {
+      this[key] = new api[key](this)
+    }
+
+    // 添加请求 RTT 过长警告
+    this._roundTripTimer = setInterval((): void => {
+      for (const [msgId, callbackPromise] of this._promises.entries()) {
+        const RTT = new Date().getTime() - callbackPromise.createdAt.getTime()
+
+        if (RTT) {
+          this.logger.warn(`${SDK_NAME}-checking: request RTT is over ${EXPIRE_DURATION}, method: `, callbackPromise.method)
+        }
+      }
+    }, HEARTBEAT_DURATION)
   }
 
   /**
