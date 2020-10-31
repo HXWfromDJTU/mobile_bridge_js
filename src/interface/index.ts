@@ -10,3 +10,19 @@ export interface IPromise {
   createdAt: Date
 }
 
+export interface IMessage {
+  jsonrpc: string,
+  id: string,
+}
+
+export interface IResponse extends IMessage {
+  data?: any,
+  errCode: number,
+  errMsg?: string
+}
+
+export interface IRequest extends IMessage {
+  method: string, // 请求的方法名
+  params: any
+}
+

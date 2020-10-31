@@ -1,10 +1,12 @@
 import * as EventEmitter from 'eventemitter3'
-import { IChannel } from './interface'
+import { IChannel, IMessage, IRequest, IResponse } from './interface'
 import { IPromise } from './interface'
 import pkg = require('../package.json')
 import { IframeChannel } from './channel/IframeChannel'
 import { Logger } from 'loglevel'
-import { isNotify } from './helper'
+import { isNotify, isRequest, isResponse } from './helper'
+import { EXPIRE_DURATION, JSON_RPC_KEY, JSON_RPC_VERSION, NOTIFY_PREFIX, SDK_NAME } from './constant'
+import { RES_CODE } from './constant/rescode'
 
 export class MobileBridge extends EventEmitter {
   public logger: Logger
@@ -25,34 +27,75 @@ export class MobileBridge extends EventEmitter {
         // 确认消息格式
         if (event.data
             && typeof event.data === 'string'
-            && event.data.includes(`"${JSONRPC_KEY}":"${JSONRPC_VERSION}"`)) {
-          // todo: 回复消息
+            && event.data.includes(`"${JSON_RPC_KEY}":"${JSON_RPC_VERSION}"`)) {
+          // todo: 收到消息后，处理消息
           this.response(event.data)
         }
       }
     }
   }
 
+  /**
+   * response 起到的是 handleRequest 的作用, 可以是内部自动调用，也可以是使用者调用
+   * @param data 信道传输过来的 string 消息，期望是 IRequest 格式的 JSON_STRING
+   */
   response (data: string) {
     // 尝试转换为 JSON 格式消息
     let message: any
     try {
       message = JSON.parse(data)
-      this.logger.debug(`${SDK_NAME}.response receive:`, data)
+      this.logger.debug(`${SDK_NAME}-response receive:`, data)
     }
     catch (err) {
-      this.logger.error(`${SDK_NAME}.response parse data error.`, data)
+      this.logger.error(`${SDK_NAME}-response parse data error.`, data)
       return
     }
 
-    const { id, method, params } = message
+    // 该消息为 请求类型 的消息
+    if (isRequest(message)) {
+      const { id, method, params } = message
 
-    // 根据是否通知类型的消息，做出不同处理
-    if (isNotify(message)) {
+      this.logger.debug(`${SDK_NAME}-response: notify`, id)
+      // 收到请求，使用事件机制对外暴露
+      this.emit(`${NOTIFY_PREFIX}:${method}`, params)
+      return
+    }
 
-    } else {
+    // 该消息为 响应类型 的消息
+    if (isResponse(message)) {
+      const { id, errCode, data, errMsg } = message
+
       // 从请求记录中，找到请求时设定的promise处理
-      const promise = this._promises.get(id)
+      const callbackPromise = this._promises.get(id)
+
+      if (callbackPromise) {
+        // 判断是否超时,给出警告
+        const RTT = new Date().getTime() - callbackPromise.createdAt.getTime()
+        if (RTT > EXPIRE_DURATION) {
+          this.logger.warn(`${ SDK_NAME }-response: receive response more than ${ EXPIRE_DURATION }s`)
+        }
+
+        // 移除对对应的promise
+        this._promises.delete(id)
+        this.logger.debug(`${ SDK_NAME }-response, remove callback promise, id = ${ id }`)
+
+        // 执行对应的callback promise
+        if (errCode === RES_CODE.success) {
+          this.logger.error(`${ SDK_NAME }-response: response error`, errMsg)
+          // 调用 reject 方法处理异常回复
+          callbackPromise.reject.call(this, errMsg)
+        }
+        else {
+          this.logger.debug(`${ SDK_NAME }-response: received data`, data)
+          // 调用 resolve 方法处理正常回复
+          callbackPromise.resolve.call(this, data)
+        }
+      }
+      else {
+        // 发现是 response 消息，但本地没有找到 对应请求 promise 记录
+        this.logger.error(`${ SDK_NAME }-response, no promise for this message`, message)
+        return
+      }
     }
   }
 }
