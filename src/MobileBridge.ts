@@ -4,35 +4,41 @@ import { IPromise } from './interface'
 import pkg = require('../package.json')
 import { IframeChannel } from './channel/IframeChannel'
 import { Logger } from 'loglevel'
-import { isNotify, isRequest, isResponse } from './helper'
+import { isIframeEnv, isNotify, isRequest, isResponse } from './helper'
 import { EXPIRE_DURATION, JSON_RPC_KEY, JSON_RPC_VERSION, NOTIFY_PREFIX, SDK_NAME } from './constant'
 import { RES_CODE } from './constant/rescode'
+import uniqueId from 'lodash-es/uniqueId'
+import api from './api'
 
-export class MobileBridge extends EventEmitter {
+export default class MobileBridge extends EventEmitter {
   public logger: Logger
+  public version = pkg.version
+
   protected _channel: IChannel
   protected _promises: Map<string, IPromise>
   protected _timer: any
-  protected
-
-  version = pkg.version
 
   constructor() {
     super()
 
-    // 使用 Iframe
-    if (window.self !== window.top) {
+    // 初始化信道
+    if (isIframeEnv()) {
       this._channel = new IframeChannel()
       window.onmessage = (event: any): void => {
         // 确认消息格式
         if (event.data
-            && typeof event.data === 'string'
-            && event.data.includes(`"${JSON_RPC_KEY}":"${JSON_RPC_VERSION}"`)) {
+          && typeof event.data === 'string'
+          && event.data.includes(`"${ JSON_RPC_KEY }":"${ JSON_RPC_VERSION }"`)) {
           // todo: 收到消息后，处理消息
           this.response(event.data)
         }
       }
     }
+    else {
+      // 使用 native channel
+    }
+
+    // 绑定 API
   }
 
   /**
@@ -97,5 +103,35 @@ export class MobileBridge extends EventEmitter {
         return
       }
     }
+  }
+
+  /**
+   * 发送消息
+   * @param payload 发送的数据体
+   * @param isNotify
+   */
+  request (payload: any, isNotify = false) {
+    return new Promise((resolve, reject) => {
+      // 包装请求
+      payload = Object.assign(payload, {
+        id: isNotify ? NOTIFY_PREFIX : uniqueId(`${SDK_NAME}`),
+        [JSON_RPC_KEY]: JSON_RPC_VERSION
+      })
+
+      // 若发送的不是一个 通知类型 的消息，则需要记录其处理方式
+      if (!isNotify) {
+        this.logger.debug(`${SDK_NAME}-request add callback promise, id =`, payload.id)
+        // 使用 Map 保存请求对应的处理promise
+        this._promises.set(payload.id, {
+          resolve,
+          reject,
+          method: payload.method,
+          createdAt: new Date(),
+        })
+      }
+
+      this.logger.debug(`${SDK_NAME}-request message send, payload =`, payload)
+      this._channel.postMessage(payload)
+    })
   }
 }

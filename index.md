@@ -3,6 +3,7 @@
 * 通信信道
     * 使用Iframe
     * 使用Native Channel
+* 区分一般请求 和 通知
 * 请求缓存区，收发制度
 * promise 封装
 * 客户端的webview 用于加载sdk,dapp可以方面也加载sdk,则可以实现双方互相监听的效果。
@@ -13,6 +14,7 @@
 * 需要补充一个思维导图      
 
 ### webapi 
+* Iframe 的特性，当下的用途在哪里？如何判断当前页面是否处于Iframe之中
 * postMessage
 * window.top window.self
 

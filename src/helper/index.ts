@@ -19,3 +19,7 @@ export function isResponse (msgObj: any): boolean {
     return  msgObj.hasOwnProperty(requestKey)
   })
 }
+
+export function isIframeEnv (): boolean {
+  return window.self !== window.top
+}

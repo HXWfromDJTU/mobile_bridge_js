@@ -6,7 +6,7 @@ export interface IChannel {
 export interface IPromise {
   resolve: Function,
   reject: Function,
-  path: string,
+  method: string,
   createdAt: Date
 }
 
