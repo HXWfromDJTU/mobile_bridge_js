@@ -9,7 +9,13 @@
     "emitDecoratorMetadata": true,
     "baseUrl": "./",
     "declaration": true,
-    "declarationDir": "./types"
+    "declarationDir": "./types",
+    "lib": [
+      "dom",
+      "es5",
+      "scripthost",
+      "es2015.collection"
+    ]
   },
   "include": [
     "src"

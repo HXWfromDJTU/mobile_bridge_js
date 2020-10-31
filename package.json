@@ -3,7 +3,10 @@
   "version": "0.0.1",
   "description": "",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "eventemitter3": "^4.0.7",
+    "loglevel": "^1.7.0"
+  },
   "devDependencies": {
     "webpack": "^5.3.0",
     "webpack-bundle-analyzer": "^3.9.0",
