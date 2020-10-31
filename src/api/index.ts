@@ -1,5 +1,5 @@
+import TestModule from './TestModule'
 
-
-export const {
-
+export {
+  TestModule
 }

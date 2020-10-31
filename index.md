@@ -22,10 +22,14 @@
 * log-level
  * 一个优秀的sdk，必须要可以保证日志的可追随性
  
-### 打包
+### 构建与发布
 * cjs
 * esm
 * amd
+* npmjs托管
+
+### 测试模块
+
 
 ## 参考资料
 [1] [window.postMessage - MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage)      
