@@ -9,7 +9,7 @@
 * 客户端的webview 用于加载sdk,dapp可以方面也加载sdk,则可以实现双方互相监听的效果。
     * 如何区分是来自于 mobile_bridge_sdk的呢？而不是其他sdk呢？
 * eventEmitter
-* 异常类型的封装
+* 异常类型的封装、参数错误抛出的异常
 
 ## 图例
 * 参考了同事 `electron`的多窗口、跨进程通信的设计思维    
@@ -27,6 +27,7 @@
 ### 构建与发布
 * cjs、esm、amd 格式
 * npmjs托管
+* HtmlWebpackPlugin、DefinePlugin 是做什么的？为什么要这么用？
 
 ### 测试模块
 

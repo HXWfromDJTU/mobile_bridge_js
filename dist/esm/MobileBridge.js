@@ -1,5 +1,6 @@
 import * as EventEmitter from 'eventemitter3';
 import { IframeChannel } from './channel/IframeChannel';
+import * as LoggerLevel from 'loglevel';
 import { isIframeEnv, isRequest, isResponse } from './helper';
 import { EXPIRE_DURATION, HEARTBEAT_DURATION, JSON_RPC_KEY, JSON_RPC_VERSION, NOTIFY_PREFIX, SDK_NAME } from './constant';
 import { RES_CODE } from './constant/rescode';
@@ -9,7 +10,9 @@ const uniqueId = require('lodash.uniqueid');
 export default class MobileBridge extends EventEmitter {
     constructor() {
         super();
+        this.logger = LoggerLevel.getLogger('MobileBridge');
         this.version = pkg.version;
+        this._promises = new Map();
         // 初始化信道
         if (isIframeEnv()) {
             this._channel = new IframeChannel();

@@ -2,7 +2,7 @@ import * as EventEmitter from 'eventemitter3'
 import { IChannel, IMessage, IRequest, IResponse } from './interface'
 import { IPromise } from './interface'
 import { IframeChannel } from './channel/IframeChannel'
-import { Logger } from 'loglevel'
+import * as LoggerLevel from 'loglevel'
 import { isIframeEnv, isNotify, isRequest, isResponse } from './helper'
 import {
   EXPIRE_DURATION,
@@ -18,11 +18,11 @@ const pkg = require('../package.json')
 const uniqueId = require('lodash.uniqueid');
 
 export default class MobileBridge extends EventEmitter {
-  public logger: Logger
+  public logger: LoggerLevel.Logger = LoggerLevel.getLogger('MobileBridge')
   public version = pkg.version
 
   protected _channel: IChannel
-  protected _promises: Map<string, IPromise>
+  protected _promises: Map<string, IPromise> = new Map()
   protected _roundTripTimer: any
 
   constructor() {

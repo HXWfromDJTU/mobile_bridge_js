@@ -3,8 +3,6 @@ const path = require('path')
 const webpack = require('webpack')
 const { merge } = require('webpack-merge')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
-
 const pkg = require('./package.json')
 
 const SRC = path.resolve(__dirname, 'src')
@@ -26,7 +24,7 @@ module.exports = function (env = {}, argv) {
       path: DIST,
       filename: `${pkg.name}.umd.js`,
       libraryTarget: 'umd',
-      library: 'mobile_bridge',
+      library: 'MobileBridge',
       libraryExport: 'default',
     },
     optimization: {
@@ -50,11 +48,11 @@ module.exports = function (env = {}, argv) {
         NODE_RUNTIME: JSON.stringify(false),
         WEB_RUNTIME: JSON.stringify(true)
       }),
-      // new HtmlWebpackPlugin({
-      //   template: path.resolve(__dirname, 'public', 'index.html'),
-      //   inject: false,
-      //   minify: false,
-      // })
+      new HtmlWebpackPlugin({
+        template: path.resolve(__dirname, 'template', 'index.html'),
+        inject: true,
+        minify: false,
+      }),
     ],
     devtool: false,
     devServer: {
@@ -83,11 +81,6 @@ module.exports = function (env = {}, argv) {
       },
       devtool: 'source-map',
     })
-
-    // 生成 bundle 分析报告
-    if (env.analysis) {
-      minifiedConfig.plugins.push(new BundleAnalyzerPlugin())
-    }
 
     return [config, minifiedConfig]
   }

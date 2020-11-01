@@ -1,9 +1,9 @@
 import * as EventEmitter from 'eventemitter3';
 import { IChannel } from './interface';
 import { IPromise } from './interface';
-import { Logger } from 'loglevel';
+import * as LoggerLevel from 'loglevel';
 export default class MobileBridge extends EventEmitter {
-    logger: Logger;
+    logger: LoggerLevel.Logger;
     version: any;
     protected _channel: IChannel;
     protected _promises: Map<string, IPromise>;
