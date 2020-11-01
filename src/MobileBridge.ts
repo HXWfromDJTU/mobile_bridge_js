@@ -14,6 +14,7 @@ import {
 } from './constant'
 import { RES_CODE } from './constant/rescode'
 import * as API from './api'
+import { NativeChannel } from './channel/NativeChannel'
 const pkg = require('../package.json')
 const uniqueId = require('lodash.uniqueid');
 
@@ -44,6 +45,7 @@ export default class MobileBridge extends EventEmitter {
     }
     else {
       // 使用 native channel
+      this._channel = new NativeChannel('ABCWalletBridge', console.log)
     }
 
     // 绑定 API 实例到 Bridge 上

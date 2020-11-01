@@ -35,4 +35,5 @@
 ## 参考资料
 [1] [window.postMessage - MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage)      
 [2] [logger-level - github](https://github.com/pimterry/loglevel)    
-[3] [webpack - ts-loader](https://webpack.js.org/guides/typescript/)
+[3] [webpack - ts-loader](https://webpack.js.org/guides/typescript/)     
+[4] [JavaScript WebView and iOS](https://www.vivekkalyan.com/javascript-webview-and-ios)

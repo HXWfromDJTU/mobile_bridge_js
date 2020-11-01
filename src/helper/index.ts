@@ -23,3 +23,18 @@ export function isResponse (msgObj: any): boolean {
 export function isIframeEnv (): boolean {
   return window.self !== window.top
 }
+
+/**
+ * 获取当前平台以及应用信息
+ */
+export function getAllUserAgent () {
+  const ua: string = window.navigator.userAgent.toLowerCase()
+  return {
+    // 平台UA
+    android: ua.includes('android'),
+    ios: ua.includes('iphone') || ua.includes('ipad'),
+    windows: ua.includes('windows'),
+    ubuntu: ua.includes('ubuntu'),
+    mac: ua.includes('mac'),
+  }
+}
