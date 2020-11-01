@@ -1,4 +1,4 @@
-import { MobileBridge } from './MobileBridge'
+import MobileBridge from './MobileBridge'
 
 const mobileBridge = new MobileBridge()
 

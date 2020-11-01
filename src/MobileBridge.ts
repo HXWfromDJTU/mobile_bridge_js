@@ -1,7 +1,6 @@
 import * as EventEmitter from 'eventemitter3'
 import { IChannel, IMessage, IRequest, IResponse } from './interface'
 import { IPromise } from './interface'
-import pkg = require('../package.json')
 import { IframeChannel } from './channel/IframeChannel'
 import { Logger } from 'loglevel'
 import { isIframeEnv, isNotify, isRequest, isResponse } from './helper'
@@ -14,8 +13,9 @@ import {
   SDK_NAME
 } from './constant'
 import { RES_CODE } from './constant/rescode'
-import uniqueId from 'lodash-es/uniqueId'
 import api from './api'
+const pkg = require('../package.json')
+const uniqueId = require('lodash.uniqueid');
 
 export default class MobileBridge extends EventEmitter {
   public logger: Logger
@@ -23,7 +23,7 @@ export default class MobileBridge extends EventEmitter {
 
   protected _channel: IChannel
   protected _promises: Map<string, IPromise>
-  protected _roundTripTimer: number
+  protected _roundTripTimer: any
 
   constructor() {
     super()
@@ -50,7 +50,7 @@ export default class MobileBridge extends EventEmitter {
       this[key] = new api[key](this)
     }
 
-    // 添加请求 RTT 过长警告
+    // 添加请求 RTT 过长警告  todo: 清理计时器
     this._roundTripTimer = setInterval((): void => {
       for (const [msgId, callbackPromise] of this._promises.entries()) {
         const RTT = new Date().getTime() - callbackPromise.createdAt.getTime()

@@ -4,10 +4,12 @@
     * 使用Iframe
     * 使用Native Channel
 * 区分一般请求 和 通知
-* 请求缓存区，收发制度
+* 请求缓存区，收发制度  
 * promise 封装
 * 客户端的webview 用于加载sdk,dapp可以方面也加载sdk,则可以实现双方互相监听的效果。
     * 如何区分是来自于 mobile_bridge_sdk的呢？而不是其他sdk呢？
+* eventEmitter
+* 异常类型的封装
 
 ## 图例
 * 参考了同事 `electron`的多窗口、跨进程通信的设计思维    
@@ -23,9 +25,7 @@
  * 一个优秀的sdk，必须要可以保证日志的可追随性
  
 ### 构建与发布
-* cjs
-* esm
-* amd
+* cjs、esm、amd 格式
 * npmjs托管
 
 ### 测试模块
@@ -33,4 +33,5 @@
 
 ## 参考资料
 [1] [window.postMessage - MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage)      
-[2] [logger-level - github](https://github.com/pimterry/loglevel)
+[2] [logger-level - github](https://github.com/pimterry/loglevel)    
+[3] [webpack - ts-loader](https://webpack.js.org/guides/typescript/)
