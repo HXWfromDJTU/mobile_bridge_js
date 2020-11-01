@@ -45,7 +45,7 @@ export default class MobileBridge extends EventEmitter {
     }
     else {
       // 使用 native channel
-      this._channel = new NativeChannel('ABCWalletBridge', console.log)
+      this._channel = new NativeChannel(SDK_NAME, console.log)
     }
 
     // 绑定 API 实例到 Bridge 上

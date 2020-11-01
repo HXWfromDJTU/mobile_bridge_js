@@ -549,6 +549,7 @@ var helper_1 = __webpack_require__(275);
 var constant_1 = __webpack_require__(807);
 var rescode_1 = __webpack_require__(803);
 var API = __webpack_require__(49);
+var NativeChannel_1 = __webpack_require__(6);
 var pkg = __webpack_require__(306);
 var uniqueId = __webpack_require__(970);
 var MobileBridge = /** @class */ (function (_super) {
@@ -574,6 +575,7 @@ var MobileBridge = /** @class */ (function (_super) {
         }
         else {
             // 使用 native channel
+            _this._channel = new NativeChannel_1.NativeChannel(constant_1.SDK_NAME, console.log);
         }
         // 绑定 API 实例到 Bridge 上
         for (var _i = 0, _a = Object.keys(API); _i < _a.length; _i++) {
@@ -780,6 +782,68 @@ exports.IframeChannel = IframeChannel;
 
 /***/ }),
 
+/***/ 6:
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.NativeChannel = void 0;
+var helper_1 = __webpack_require__(275);
+var constant_1 = __webpack_require__(807);
+var NativeChannel = /** @class */ (function () {
+    /**
+     *
+     * @param useChannelName 当前用于通信的信道对象，在window上的key值
+     * @param logger
+     */
+    function NativeChannel(useChannelName, logger) {
+        this.isIOS = false;
+        this.isAndroid = false;
+        var UAInfo = helper_1.getAllUserAgent();
+        this.logger = logger;
+        this.useChannelName = useChannelName;
+        this.isIOS = UAInfo.ios;
+        this.isAndroid = UAInfo.android;
+    }
+    NativeChannel.prototype.postMessage = function (data) {
+        this.logger.debug(constant_1.SDK_NAME + "-NativeChannel send message", data);
+        if (this.isAndroid) {
+            this.logger.debug(constant_1.SDK_NAME + "-NativeChannel Android send message", data);
+            var bridge = window[this.useChannelName];
+            if (bridge && bridge.postMessage) {
+                bridge.postMessage(NativeChannel.dataToString(data));
+            }
+            else {
+                this.logger.error(constant_1.SDK_NAME + "-NativeChannel Android: bridge not found in window, name =", this.useChannelName);
+            }
+        }
+        else if (this.isIOS) {
+            this.logger.debug(constant_1.SDK_NAME + "-NativeChannel iOS send message", data);
+            if (window.webkit
+                && window.webkit.messageHandlers
+                && window.webkit.messagehandlers[this.useChannelName]
+                && window.webkit.messageHandlers[this.useChannelName].postMessage) {
+                window.webkit.messageHandlers[this.useChannelName].postMessage(data);
+            }
+            else {
+                this.logger.error(constant_1.SDK_NAME + "-NativeChannel iOS: bridge not found in messageHandlers, name =", this.useChannelName);
+            }
+        }
+        else {
+            this.logger.error(constant_1.SDK_NAME + "-NativeChannel platform not supported, userAgent = ", window.navigator.userAgent);
+        }
+    };
+    NativeChannel.dataToString = function (data) {
+        return typeof data === 'string' ? data : JSON.stringify(data);
+    };
+    return NativeChannel;
+}());
+exports.NativeChannel = NativeChannel;
+
+
+/***/ }),
+
 /***/ 807:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -819,7 +883,7 @@ exports.RES_CODE = {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.isIframeEnv = exports.isResponse = exports.isRequest = exports.isNotify = void 0;
+exports.getAllUserAgent = exports.isIframeEnv = exports.isResponse = exports.isRequest = exports.isNotify = void 0;
 function isNotify(message) {
     return true;
 }
@@ -844,6 +908,21 @@ function isIframeEnv() {
     return window.self !== window.top;
 }
 exports.isIframeEnv = isIframeEnv;
+/**
+ * 获取当前平台以及应用信息
+ */
+function getAllUserAgent() {
+    var ua = window.navigator.userAgent.toLowerCase();
+    return {
+        // 平台UA
+        android: ua.includes('android'),
+        ios: ua.includes('iphone') || ua.includes('ipad'),
+        windows: ua.includes('windows'),
+        ubuntu: ua.includes('ubuntu'),
+        mac: ua.includes('mac'),
+    };
+}
+exports.getAllUserAgent = getAllUserAgent;
 
 
 /***/ }),

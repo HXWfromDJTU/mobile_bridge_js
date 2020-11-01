@@ -24,6 +24,8 @@ export class NativeChannel implements IChannel {
   }
 
   postMessage (data: any): void {
+    this.logger.debug(`${SDK_NAME}-NativeChannel send message`, data)
+
     if (this.isAndroid) {
       this.logger.debug(`${SDK_NAME}-NativeChannel Android send message`, data)
       const bridge = window[this.useChannelName]
