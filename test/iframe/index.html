@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Mobile Bridge Test</title>
+</head>
+<body>
+<script src="../../dist/umd/mobile_bridge_js.umd.min.js"></script></body>
+<script type="text/javascript">
+  console.log('Home page loaded')
+
+  // window.MobileBridge.on('notify:test-method', event => {
+  //   console.log('home received - notify:test-method:', event)
+  // })
+
+  window.onmessage = event => {
+    console.log('home received - notify:test-method:', event)
+  }
+</script>
+<iframe src="./iframe.html" frameborder="0"></iframe>
+</html>

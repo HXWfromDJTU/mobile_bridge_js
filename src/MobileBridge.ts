@@ -13,7 +13,7 @@ import {
   SDK_NAME
 } from './constant'
 import { RES_CODE } from './constant/rescode'
-import api from './api'
+import * as API from './api'
 const pkg = require('../package.json')
 const uniqueId = require('lodash.uniqueid');
 
@@ -27,7 +27,6 @@ export default class MobileBridge extends EventEmitter {
 
   constructor() {
     super()
-
     console.debug(`${SDK_NAME}.init: isIframeEnv`, isIframeEnv())
 
     // 初始化信道
@@ -48,8 +47,9 @@ export default class MobileBridge extends EventEmitter {
     }
 
     // 绑定 API 实例到 Bridge 上
-    for (const key of Object.keys(api)) {
-      this[key] = new api[key](this)
+    for (const key of Object.keys(API)) {
+      // 使用当前 bridge 实例化 api, 并且绑定到全局
+      this[key] = new API[key](this)
     }
 
     // 添加请求 RTT 过长警告  todo: 清理计时器
@@ -137,7 +137,7 @@ export default class MobileBridge extends EventEmitter {
     return new Promise((resolve, reject) => {
       // 包装请求
       payload = Object.assign(payload, {
-        id: isNotify ? NOTIFY_PREFIX : uniqueId(`${SDK_NAME}`),
+        id: isNotify ? NOTIFY_PREFIX : uniqueId(`${SDK_NAME}-`),
         [JSON_RPC_KEY]: JSON_RPC_VERSION
       })
 

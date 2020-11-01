@@ -52,7 +52,13 @@ module.exports = function (env = {}, argv) {
         template: path.resolve(__dirname, 'template', 'iframe.html'),
         inject: true,
         minify: false,
-        filename: 'iframe.html'
+        filename: path.resolve(__dirname, 'test/iframe', 'iframe.html'),
+      }),
+      new HtmlWebpackPlugin({
+        template: path.resolve(__dirname, 'template', 'index.html'),
+        inject: true,
+        minify: false,
+        filename:path.resolve(__dirname, 'test/iframe', 'index.html'),
       }),
     ],
     devtool: false,

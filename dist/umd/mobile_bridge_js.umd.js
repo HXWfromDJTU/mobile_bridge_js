@@ -548,7 +548,7 @@ var IframeChannel_1 = __webpack_require__(312);
 var helper_1 = __webpack_require__(275);
 var constant_1 = __webpack_require__(807);
 var rescode_1 = __webpack_require__(803);
-var api_1 = __webpack_require__(49);
+var API = __webpack_require__(49);
 var pkg = __webpack_require__(306);
 var uniqueId = __webpack_require__(970);
 var MobileBridge = /** @class */ (function (_super) {
@@ -576,9 +576,10 @@ var MobileBridge = /** @class */ (function (_super) {
             // 使用 native channel
         }
         // 绑定 API 实例到 Bridge 上
-        for (var _i = 0, _a = Object.keys(api_1.default); _i < _a.length; _i++) {
+        for (var _i = 0, _a = Object.keys(API); _i < _a.length; _i++) {
             var key = _a[_i];
-            _this[key] = new api_1.default[key](_this);
+            // 使用当前 bridge 实例化 api, 并且绑定到全局
+            _this[key] = new API[key](_this);
         }
         // 添加请求 RTT 过长警告  todo: 清理计时器
         _this._roundTripTimer = setInterval(function () {
@@ -660,7 +661,7 @@ var MobileBridge = /** @class */ (function (_super) {
             var _a;
             // 包装请求
             payload = Object.assign(payload, (_a = {
-                    id: isNotify ? constant_1.NOTIFY_PREFIX : uniqueId("" + constant_1.SDK_NAME)
+                    id: isNotify ? constant_1.NOTIFY_PREFIX : uniqueId(constant_1.SDK_NAME + "-")
                 },
                 _a[constant_1.JSON_RPC_KEY] = constant_1.JSON_RPC_VERSION,
                 _a));
@@ -752,10 +753,9 @@ exports.default = TestModule;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TestModule = void 0;
 var TestModule_1 = __webpack_require__(601);
-exports.default = {
-    TestModule: TestModule_1.default
-};
+exports.TestModule = TestModule_1.default;
 
 
 /***/ }),
@@ -856,7 +856,9 @@ var __webpack_unused_export__;
 
 __webpack_unused_export__ = ({ value: true });
 var MobileBridge_1 = __webpack_require__(4);
+var constant_1 = __webpack_require__(807);
 var mobileBridge = new MobileBridge_1.default();
+window[constant_1.SDK_NAME] = mobileBridge;
 exports.default = mobileBridge;
 
 
