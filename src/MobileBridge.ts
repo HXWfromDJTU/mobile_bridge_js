@@ -18,7 +18,7 @@ const pkg = require('../package.json')
 const uniqueId = require('lodash.uniqueid');
 
 export default class MobileBridge extends EventEmitter {
-  public logger: LoggerLevel.Logger = LoggerLevel.getLogger('MobileBridge')
+  public logger: any = window.console
   public version = pkg.version
 
   protected _channel: IChannel
@@ -27,6 +27,8 @@ export default class MobileBridge extends EventEmitter {
 
   constructor() {
     super()
+
+    console.debug(`${SDK_NAME}.init: isIframeEnv`, isIframeEnv())
 
     // 初始化信道
     if (isIframeEnv()) {

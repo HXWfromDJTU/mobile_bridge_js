@@ -1,4 +1,4 @@
-export const SDK_NAME = 'Mobile_Bridge_JS'
+export const SDK_NAME = 'MobileBridge'
 export const JSON_RPC_VERSION = '2.0'
 export const JSON_RPC_KEY = 'jsonrpc'
 

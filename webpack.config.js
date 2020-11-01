@@ -49,9 +49,10 @@ module.exports = function (env = {}, argv) {
         WEB_RUNTIME: JSON.stringify(true)
       }),
       new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, 'template', 'index.html'),
+        template: path.resolve(__dirname, 'template', 'iframe.html'),
         inject: true,
         minify: false,
+        filename: 'iframe.html'
       }),
     ],
     devtool: false,
