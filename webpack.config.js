@@ -52,13 +52,13 @@ module.exports = function (env = {}, argv) {
         template: path.resolve(__dirname, 'template', 'iframe.html'),
         inject: true,
         minify: false,
-        filename: path.resolve(__dirname, 'test/iframe', 'iframe.html'),
+        filename: path.resolve(__dirname, 'dist/umd', 'iframe.html'),
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, 'template', 'index.html'),
         inject: true,
         minify: false,
-        filename:path.resolve(__dirname, 'test/iframe', 'index.html'),
+        filename:path.resolve(__dirname, 'dist/umd', 'index.html'),
       }),
     ],
     devtool: false,
@@ -66,8 +66,7 @@ module.exports = function (env = {}, argv) {
       host: '0.0.0.0',
       disableHostCheck: true,
       contentBase: [
-        path.resolve(__dirname, 'public'),
-        path.resolve(__dirname, 'dist'),
+        path.resolve(__dirname, 'dist')
       ],
     }
   }

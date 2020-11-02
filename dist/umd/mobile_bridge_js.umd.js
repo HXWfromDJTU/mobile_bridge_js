@@ -559,11 +559,13 @@ var MobileBridge = /** @class */ (function (_super) {
         _this.logger = window.console;
         _this.version = pkg.version;
         _this._promises = new Map();
-        console.debug(constant_1.SDK_NAME + ".init: isIframeEnv", helper_1.isIframeEnv());
+        window[constant_1.SDK_NAME] = _this;
         // 初始化信道
         if (helper_1.isIframeEnv()) {
+            console.debug(constant_1.SDK_NAME + ".init: use IframeChannel");
             _this._channel = new IframeChannel_1.IframeChannel();
             window.onmessage = function (event) {
+                _this.logger.debug(constant_1.SDK_NAME + "-receive message, ready to handle", event);
                 // 确认消息格式
                 if (event.data
                     && typeof event.data === 'string'
@@ -574,9 +576,11 @@ var MobileBridge = /** @class */ (function (_super) {
             };
         }
         else {
+            console.debug(constant_1.SDK_NAME + ".init: use NativeChannel");
             // 使用 native channel
             _this._channel = new NativeChannel_1.NativeChannel(constant_1.SDK_NAME, console.log);
         }
+        console.log('========', _this, window[constant_1.SDK_NAME]);
         // 绑定 API 实例到 Bridge 上
         for (var _i = 0, _a = Object.keys(API); _i < _a.length; _i++) {
             var key = _a[_i];
@@ -935,9 +939,7 @@ var __webpack_unused_export__;
 
 __webpack_unused_export__ = ({ value: true });
 var MobileBridge_1 = __webpack_require__(4);
-var constant_1 = __webpack_require__(807);
 var mobileBridge = new MobileBridge_1.default();
-window[constant_1.SDK_NAME] = mobileBridge;
 exports.default = mobileBridge;
 
 
@@ -947,7 +949,7 @@ exports.default = mobileBridge;
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"mobile_bridge_js\",\"version\":\"0.0.1\",\"description\":\"\",\"main\":\"index.js\",\"dependencies\":{\"eventemitter3\":\"^4.0.7\",\"lodash.uniqueid\":\"^4.0.1\",\"loglevel\":\"^1.7.0\",\"webpack\":\"^5.3.2\"},\"devDependencies\":{\"eventemitter3\":\"^4.0.7\",\"html-webpack-plugin\":\"^4.5.0\",\"lodash.uniqueid\":\"^4.0.1\",\"open-browser-webpack-plugin\":\"^0.0.5\",\"ts-loader\":\"^8.0.7\",\"typescript\":\"^4.0.5\",\"webpack\":\"^5.3.0\",\"webpack-bundle-analyzer\":\"^3.9.0\",\"webpack-cli\":\"^4.1.0\",\"webpack-merge\":\"^5.3.0\"},\"scripts\":{\"test\":\"echo \\\"Error: no test specified\\\" && exit 1\",\"build\":\"npm run build:cjs && npm run build:esm && npm run build:umd\",\"build:umd\":\"webpack --mode=production --config webpack.config.js\",\"build:cjs\":\"tsc -p tsconfig.cjs.json\",\"build:esm\":\"tsc -p tsconfig.esm.json\"},\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/HXWfromDJTU/mobile_bridge_js.git\"},\"author\":\"\",\"license\":\"ISC\",\"bugs\":{\"url\":\"https://github.com/HXWfromDJTU/mobile_bridge_js/issues\"},\"homepage\":\"https://github.com/HXWfromDJTU/mobile_bridge_js#readme\"}");
+module.exports = JSON.parse("{\"name\":\"mobile_bridge_js\",\"version\":\"0.0.1\",\"description\":\"\",\"main\":\"index.js\",\"dependencies\":{\"eventemitter3\":\"^4.0.7\",\"lodash.uniqueid\":\"^4.0.1\",\"loglevel\":\"^1.7.0\",\"webpack\":\"^5.3.2\"},\"devDependencies\":{\"eventemitter3\":\"^4.0.7\",\"html-webpack-plugin\":\"^4.5.0\",\"lodash.uniqueid\":\"^4.0.1\",\"open-browser-webpack-plugin\":\"^0.0.5\",\"ts-loader\":\"^8.0.7\",\"typescript\":\"^4.0.5\",\"webpack\":\"^5.3.0\",\"webpack-bundle-analyzer\":\"^3.9.0\",\"webpack-cli\":\"^4.1.0\",\"webpack-dev-server\":\"^3.11.0\",\"webpack-merge\":\"^5.3.0\"},\"scripts\":{\"test\":\"echo \\\"Error: no test specified\\\" && exit 1\",\"build\":\"npm run build:cjs && npm run build:esm && npm run build:umd\",\"build:umd\":\"webpack --mode=production --config webpack.config.js\",\"build:cjs\":\"tsc -p tsconfig.cjs.json\",\"build:esm\":\"tsc -p tsconfig.esm.json\",\"dev:test\":\"webpack serve --mode=development --config webpack.config.js --port=1024\"},\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/HXWfromDJTU/mobile_bridge_js.git\"},\"author\":\"\",\"license\":\"ISC\",\"bugs\":{\"url\":\"https://github.com/HXWfromDJTU/mobile_bridge_js/issues\"},\"homepage\":\"https://github.com/HXWfromDJTU/mobile_bridge_js#readme\"}");
 
 /***/ })
 

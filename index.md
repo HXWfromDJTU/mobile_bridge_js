@@ -3,6 +3,7 @@
 * 通信信道
     * 使用Iframe
     * 使用Native Channel
+    * messageHandlers
 * 区分一般请求 和 通知
 * 请求缓存区，收发制度  
 * promise 封装
@@ -10,6 +11,7 @@
     * 如何区分是来自于 mobile_bridge_sdk的呢？而不是其他sdk呢？
 * eventEmitter
 * 异常类型的封装、参数错误抛出的异常
+   * 错误码设计
 
 ## 图例
 * 参考了同事 `electron`的多窗口、跨进程通信的设计思维    
@@ -23,6 +25,7 @@
 ### 工具
 * log-level
  * 一个优秀的sdk，必须要可以保证日志的可追随性
+ * 在iOS的控制台下，难以查看到JavaScript的日志，所以我们在 JavaScript 打印日志的时候，也同时向着 iOS 端发送了消息，同步日志
  
 ### 构建与发布
 * cjs、esm、amd 格式
@@ -30,10 +33,11 @@
 * HtmlWebpackPlugin、DefinePlugin 是做什么的？为什么要这么用？
 
 ### 测试模块
-
+* dev测试
 
 ## 参考资料
 [1] [window.postMessage - MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage)      
 [2] [logger-level - github](https://github.com/pimterry/loglevel)    
 [3] [webpack - ts-loader](https://webpack.js.org/guides/typescript/)     
-[4] [JavaScript WebView and iOS](https://www.vivekkalyan.com/javascript-webview-and-ios)
+[4] [JavaScript WebView and iOS](https://www.vivekkalyan.com/javascript-webview-and-ios)    
+[5] [JSON-RPC 2.0](https://www.jsonrpc.org/specification)       

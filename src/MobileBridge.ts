@@ -28,12 +28,15 @@ export default class MobileBridge extends EventEmitter {
 
   constructor() {
     super()
-    console.debug(`${SDK_NAME}.init: isIframeEnv`, isIframeEnv())
+    window[SDK_NAME] = this
 
     // 初始化信道
     if (isIframeEnv()) {
+      console.debug(`${SDK_NAME}.init: use IframeChannel`)
+
       this._channel = new IframeChannel()
       window.onmessage = (event: any): void => {
+        this.logger.debug(`${SDK_NAME}-receive message, ready to handle`, event)
         // 确认消息格式
         if (event.data
           && typeof event.data === 'string'
@@ -44,10 +47,11 @@ export default class MobileBridge extends EventEmitter {
       }
     }
     else {
+      console.debug(`${SDK_NAME}.init: use NativeChannel`)
       // 使用 native channel
       this._channel = new NativeChannel(SDK_NAME, console.log)
     }
-
+    console.log('========', this, window[SDK_NAME])
     // 绑定 API 实例到 Bridge 上
     for (const key of Object.keys(API)) {
       // 使用当前 bridge 实例化 api, 并且绑定到全局

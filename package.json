@@ -19,6 +19,7 @@
     "webpack": "^5.3.0",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-cli": "^4.1.0",
+    "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.3.0"
   },
   "scripts": {
@@ -26,7 +27,8 @@
     "build": "npm run build:cjs && npm run build:esm && npm run build:umd",
     "build:umd": "webpack --mode=production --config webpack.config.js",
     "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json"
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "dev:test": "webpack serve --mode=development --config webpack.config.js --port=1024"
   },
   "repository": {
     "type": "git",
