@@ -8,25 +8,26 @@ import {
   EXPIRE_DURATION,
   HEARTBEAT_DURATION,
   JSON_RPC_KEY,
-  JSON_RPC_VERSION,
+  JSON_RPC_VERSION, NativeSDKGlobalKey,
   NOTIFY_PREFIX,
   SDK_NAME
 } from './constant'
 import { RES_CODE } from './constant/rescode'
-import * as API from './api'
 import { NativeChannel } from './channel/NativeChannel'
+import { ApiDict } from './types'
 const pkg = require('../package.json')
-const uniqueId = require('lodash.uniqueid');
+const uniqueId = require('lodash.uniqueid')
 
 export default class MobileBridge extends EventEmitter {
   public logger: any = window.console
   public version = pkg.version
+  public apiDict: ApiDict
 
   protected _channel: IChannel
   protected _promises: Map<string, IPromise> = new Map()
   protected _roundTripTimer: any
 
-  constructor() {
+  constructor(apiDict: ApiDict) {
     super()
     window[SDK_NAME] = this
 
@@ -34,13 +35,16 @@ export default class MobileBridge extends EventEmitter {
     if (isIframeEnv()) {
       console.debug(`${SDK_NAME}.init: use IframeChannel`)
 
+      // 发消息
       this._channel = new IframeChannel()
+
+      // 接收消息
       window.onmessage = (event: any): void => {
-        this.logger.debug(`${SDK_NAME}-receive message, ready to handle`, event)
+        this.logger.debug(`${SDK_NAME}-iframe-receive message, ready to handle`, event)
         // 确认消息格式
         if (event.data
-          && typeof event.data === 'string'
-          && event.data.includes(`"${ JSON_RPC_KEY }":"${ JSON_RPC_VERSION }"`)) {
+            && typeof event.data === 'string'
+            && event.data.includes(`"${ JSON_RPC_KEY }":"${ JSON_RPC_VERSION }"`)) {
           // todo: 收到消息后，处理消息
           this.response(event.data)
         }
@@ -48,14 +52,14 @@ export default class MobileBridge extends EventEmitter {
     }
     else {
       console.debug(`${SDK_NAME}.init: use NativeChannel`)
-      // 使用 native channel
-      this._channel = new NativeChannel(SDK_NAME, console.log)
+      // 使用 native channel 封装 各平台的 webview postMessage 的api
+      this._channel = new NativeChannel(NativeSDKGlobalKey, console)
     }
-    console.log('========', this, window[SDK_NAME])
-    // 绑定 API 实例到 Bridge 上
-    for (const key of Object.keys(API)) {
-      // 使用当前 bridge 实例化 api, 并且绑定到全局
-      this[key] = new API[key](this)
+
+    // 绑定 API_DICT 实例到 Bridge 上
+    for (const key of Object.keys(apiDict)) {
+      // 实例化api, 并使用 MobileBridge 作为信道，并绑定到全局
+      this[key] = new apiDict[key](this)
     }
 
     // 添加请求 RTT 过长警告  todo: 清理计时器
@@ -86,11 +90,20 @@ export default class MobileBridge extends EventEmitter {
       return
     }
 
+    if (isNotify(message)) {
+      const { id, data } = message
+
+      this.logger.debug(`${SDK_NAME}: receive notify`, id)
+      // 收到请求，使用事件机制对外暴露
+      this.emit(`${NOTIFY_PREFIX}`, data)
+      return
+    }
+
     // 该消息为 请求类型 的消息
     if (isRequest(message)) {
       const { id, method, params } = message
 
-      this.logger.debug(`${SDK_NAME}-response: notify`, id)
+      this.logger.debug(`${SDK_NAME}: receive request`, id)
       // 收到请求，使用事件机制对外暴露
       this.emit(`${NOTIFY_PREFIX}:${method}`, params)
       return
@@ -116,14 +129,14 @@ export default class MobileBridge extends EventEmitter {
 
         // 执行对应的callback promise
         if (errCode === RES_CODE.success) {
-          this.logger.error(`${ SDK_NAME }-response: response error`, errMsg)
+          this.logger.debug(`${ SDK_NAME }-response: response data`, data)
           // 调用 reject 方法处理异常回复
-          callbackPromise.reject.call(this, errMsg)
+          callbackPromise.resolve.call(this, data)
         }
         else {
-          this.logger.debug(`${ SDK_NAME }-response: received data`, data)
+          this.logger.debug(`${ SDK_NAME }-response: received error`, errMsg)
           // 调用 resolve 方法处理正常回复
-          callbackPromise.resolve.call(this, data)
+          callbackPromise.reject.call(this, errMsg)
         }
       }
       else {

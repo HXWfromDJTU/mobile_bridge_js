@@ -5,32 +5,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Mobile Bridge Test</title>
+  <style>
+    #iframe {
+      border: 1px solid pink;
+      width: 90%;
+      height: 400px;
+    }
+  </style>
 </head>
 <body>
-<h2>Welcome to Mobile Bridge.</h2>
-<div id="content"></div>
+<div id="iframe">
+  <h2>Iframe</h2>
+  <div class="row">
+    method: <input type="text" v-model="method" placeholder="method">
+  </div>
+  <div class="row">
+    dataString: <textarea v-model="dataString" placeholder="dataString"></textarea>
+  </div>
+  <div class="row">
+    <button @click="sendMessage">向 Native 发送 Request</button>
+  </div>
+  <div class="row">
+    isNotify: <input type="radio" v-model="isNotify">
+  </div>
+  <button @click="sendTestMessage">testModule.sendTestMessage</button>
+
+  <div class="row">
+    接收缓冲区:
+    <div v-text="receivedData"></div>
+    发送缓冲区:
+    <div v-text="sendingData"></div>
+  </div>
+  <button @click="clear">clear</button>
+</div>
 <script src="mobile_bridge_js.umd.min.js"></script></body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
-  const container = document.getElementById('content')
-  const content = window.MobileBridge
-  container.innerText = content
+  // 使用模拟 api 初始化 bridge
+  const mobileBridge = new window.MobileBridge(window['API_TEST'])
 
+  // 发送消息
   console.log('window.MobileBridge', window.MobileBridge)
-  const testMessageDelay = 3000
 
-  // 时延后进行消息测试
-  setTimeout(() => {
-    // 发送请求测试
-    window.MobileBridge.request({
-      method: 'test-method',
-      params: {test: 123}
-    })
+  new Vue({
+    el: '#iframe',
+    data () {
+      return {
+        method: 'test_method',
+        dataString: `{ data: 123123 }`,
+        isNotify: true,
+        receivedData: '',
+        sendingData: '',
+      }
+    },
+    mounted () {
+      mobileBridge.on('notify', data => {
+        this.receivedData = data
+      })
+    },
+    methods: {
+      sendTestMessage () {
+        this.sendingData = {
+          method: 'test_method',
+          params: {}
+        }
 
-    // 消息通知测试
-    window.MobileBridge.request({
-      method: 'test-method',
-      params: { msg: 'notify message' },
-    }, true)
-  }, testMessageDelay)
+        const res = mobileBridge['testApi'].sendTestMessage()
+        .then(data => {
+            console.log('callback message', data)
+            this.receivedData = data
+          })
+        .catch(err => {
+            console.log('callback error message', err)
+          })
+      },
+      sendMessage () {
+        const data = {
+          id: 'MobileBridge' + Math.random().toFixed(2) * 100,
+          jsonrpc: '2.0',
+          method: this.method,
+          data: this.dataString
+        }
+        this.sendingData = data
+
+        mobileBridge.request(data, this.isNotify)
+      },
+      clear () {
+        this.receivedData = ''
+        this.sendingData = ''
+      }
+    }
+  })
 </script>
 </html>

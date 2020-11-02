@@ -56,7 +56,7 @@ module.exports = function (env = {}, argv) {
       }),
       new HtmlWebpackPlugin({
         template: path.resolve(__dirname, 'template', 'index.html'),
-        inject: true,
+        inject: false,
         minify: false,
         filename:path.resolve(__dirname, 'dist/umd', 'index.html'),
       }),

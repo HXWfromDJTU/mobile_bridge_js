@@ -7,4 +7,11 @@ export default class TestModule extends BaseAPI {
       params: {}
     })
   }
+
+  getAddressFromAddressBook (): Promise<string> {
+    return this._request({
+      method: 'getAddressFromAddressBook',
+      params: {}
+    })
+  }
 }

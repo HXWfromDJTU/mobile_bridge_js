@@ -1,4 +1,6 @@
 export const SDK_NAME = 'MobileBridge'
+export const TEST_API_KEY = 'API_TEST'
+export const NativeSDKGlobalKey = 'MobileBridgeNative'
 export const JSON_RPC_VERSION = '2.0'
 export const JSON_RPC_KEY = 'jsonrpc'
 

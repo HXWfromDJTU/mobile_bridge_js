@@ -31,7 +31,7 @@ export class NativeChannel implements IChannel {
       const bridge = window[this.useChannelName]
 
       if (bridge && bridge.postMessage) {
-        bridge.postMessage(NativeChannel.dataToString(data))
+        bridge.postMessage(data)
       } else {
         this.logger.error(`${SDK_NAME}-NativeChannel Android: bridge not found in window, name =`, this.useChannelName)
       }
@@ -39,11 +39,7 @@ export class NativeChannel implements IChannel {
     else if (this.isIOS) {
       this.logger.debug(`${SDK_NAME}-NativeChannel iOS send message`, data)
 
-      if (window.webkit
-        && window.webkit.messageHandlers
-        && window.webkit.messagehandlers[this.useChannelName]
-        && window.webkit.messageHandlers[this.useChannelName].postMessage) {
-
+      if (window.webkit?.messageHandlers?.[this.useChannelName]?.postMessage) {
         window.webkit.messageHandlers[this.useChannelName].postMessage(data)
       }
       else {

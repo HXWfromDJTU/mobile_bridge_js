@@ -548,13 +548,12 @@ var IframeChannel_1 = __webpack_require__(312);
 var helper_1 = __webpack_require__(275);
 var constant_1 = __webpack_require__(807);
 var rescode_1 = __webpack_require__(803);
-var API = __webpack_require__(49);
 var NativeChannel_1 = __webpack_require__(6);
 var pkg = __webpack_require__(306);
 var uniqueId = __webpack_require__(970);
 var MobileBridge = /** @class */ (function (_super) {
     __extends(MobileBridge, _super);
-    function MobileBridge() {
+    function MobileBridge(apiDict) {
         var _this = _super.call(this) || this;
         _this.logger = window.console;
         _this.version = pkg.version;
@@ -563,9 +562,11 @@ var MobileBridge = /** @class */ (function (_super) {
         // 初始化信道
         if (helper_1.isIframeEnv()) {
             console.debug(constant_1.SDK_NAME + ".init: use IframeChannel");
+            // 发消息
             _this._channel = new IframeChannel_1.IframeChannel();
+            // 接收消息
             window.onmessage = function (event) {
-                _this.logger.debug(constant_1.SDK_NAME + "-receive message, ready to handle", event);
+                _this.logger.debug(constant_1.SDK_NAME + "-iframe-receive message, ready to handle", event);
                 // 确认消息格式
                 if (event.data
                     && typeof event.data === 'string'
@@ -577,15 +578,14 @@ var MobileBridge = /** @class */ (function (_super) {
         }
         else {
             console.debug(constant_1.SDK_NAME + ".init: use NativeChannel");
-            // 使用 native channel
-            _this._channel = new NativeChannel_1.NativeChannel(constant_1.SDK_NAME, console.log);
+            // 使用 native channel 封装 各平台的 webview postMessage 的api
+            _this._channel = new NativeChannel_1.NativeChannel(constant_1.NativeSDKGlobalKey, console);
         }
-        console.log('========', _this, window[constant_1.SDK_NAME]);
-        // 绑定 API 实例到 Bridge 上
-        for (var _i = 0, _a = Object.keys(API); _i < _a.length; _i++) {
+        // 绑定 API_DICT 实例到 Bridge 上
+        for (var _i = 0, _a = Object.keys(apiDict); _i < _a.length; _i++) {
             var key = _a[_i];
-            // 使用当前 bridge 实例化 api, 并且绑定到全局
-            _this[key] = new API[key](_this);
+            // 实例化api, 并使用 MobileBridge 作为信道，并绑定到全局
+            _this[key] = new apiDict[key](_this);
         }
         // 添加请求 RTT 过长警告  todo: 清理计时器
         _this._roundTripTimer = setInterval(function () {
@@ -614,17 +614,24 @@ var MobileBridge = /** @class */ (function (_super) {
             this.logger.error(constant_1.SDK_NAME + "-response parse data error.", data);
             return;
         }
+        if (helper_1.isNotify(message)) {
+            var id = message.id, data_1 = message.data;
+            this.logger.debug(constant_1.SDK_NAME + ": receive notify", id);
+            // 收到请求，使用事件机制对外暴露
+            this.emit("" + constant_1.NOTIFY_PREFIX, data_1);
+            return;
+        }
         // 该消息为 请求类型 的消息
         if (helper_1.isRequest(message)) {
             var id = message.id, method = message.method, params = message.params;
-            this.logger.debug(constant_1.SDK_NAME + "-response: notify", id);
+            this.logger.debug(constant_1.SDK_NAME + ": receive request", id);
             // 收到请求，使用事件机制对外暴露
             this.emit(constant_1.NOTIFY_PREFIX + ":" + method, params);
             return;
         }
         // 该消息为 响应类型 的消息
         if (helper_1.isResponse(message)) {
-            var id = message.id, errCode = message.errCode, data_1 = message.data, errMsg = message.errMsg;
+            var id = message.id, errCode = message.errCode, data_2 = message.data, errMsg = message.errMsg;
             // 从请求记录中，找到请求时设定的promise处理
             var callbackPromise = this._promises.get(id);
             if (callbackPromise) {
@@ -638,14 +645,14 @@ var MobileBridge = /** @class */ (function (_super) {
                 this.logger.debug(constant_1.SDK_NAME + "-response, remove callback promise, id = " + id);
                 // 执行对应的callback promise
                 if (errCode === rescode_1.RES_CODE.success) {
-                    this.logger.error(constant_1.SDK_NAME + "-response: response error", errMsg);
+                    this.logger.debug(constant_1.SDK_NAME + "-response: response data", data_2);
                     // 调用 reject 方法处理异常回复
-                    callbackPromise.reject.call(this, errMsg);
+                    callbackPromise.resolve.call(this, data_2);
                 }
                 else {
-                    this.logger.debug(constant_1.SDK_NAME + "-response: received data", data_1);
+                    this.logger.debug(constant_1.SDK_NAME + "-response: received error", errMsg);
                     // 调用 resolve 方法处理正常回复
-                    callbackPromise.resolve.call(this, data_1);
+                    callbackPromise.reject.call(this, errMsg);
                 }
             }
             else {
@@ -746,6 +753,12 @@ var TestModule = /** @class */ (function (_super) {
             params: {}
         });
     };
+    TestModule.prototype.getAddressFromAddressBook = function () {
+        return this._request({
+            method: 'getAddressFromAddressBook',
+            params: {}
+        });
+    };
     return TestModule;
 }(BaseAPI_1.BaseAPI));
 exports.default = TestModule;
@@ -759,9 +772,11 @@ exports.default = TestModule;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TestModule = void 0;
 var TestModule_1 = __webpack_require__(601);
-exports.TestModule = TestModule_1.default;
+var API = {
+    testApi: TestModule_1.default
+};
+exports.default = API;
 
 
 /***/ }),
@@ -811,12 +826,13 @@ var NativeChannel = /** @class */ (function () {
         this.isAndroid = UAInfo.android;
     }
     NativeChannel.prototype.postMessage = function (data) {
+        var _a, _b, _c;
         this.logger.debug(constant_1.SDK_NAME + "-NativeChannel send message", data);
         if (this.isAndroid) {
             this.logger.debug(constant_1.SDK_NAME + "-NativeChannel Android send message", data);
             var bridge = window[this.useChannelName];
             if (bridge && bridge.postMessage) {
-                bridge.postMessage(NativeChannel.dataToString(data));
+                bridge.postMessage(data);
             }
             else {
                 this.logger.error(constant_1.SDK_NAME + "-NativeChannel Android: bridge not found in window, name =", this.useChannelName);
@@ -824,10 +840,7 @@ var NativeChannel = /** @class */ (function () {
         }
         else if (this.isIOS) {
             this.logger.debug(constant_1.SDK_NAME + "-NativeChannel iOS send message", data);
-            if (window.webkit
-                && window.webkit.messageHandlers
-                && window.webkit.messagehandlers[this.useChannelName]
-                && window.webkit.messageHandlers[this.useChannelName].postMessage) {
+            if ((_c = (_b = (_a = window.webkit) === null || _a === void 0 ? void 0 : _a.messageHandlers) === null || _b === void 0 ? void 0 : _b[this.useChannelName]) === null || _c === void 0 ? void 0 : _c.postMessage) {
                 window.webkit.messageHandlers[this.useChannelName].postMessage(data);
             }
             else {
@@ -854,8 +867,10 @@ exports.NativeChannel = NativeChannel;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.HEARTBEAT_DURATION = exports.NOTIFY_PREFIX = exports.EXPIRE_DURATION = exports.JSON_RPC_KEY = exports.JSON_RPC_VERSION = exports.SDK_NAME = void 0;
+exports.HEARTBEAT_DURATION = exports.NOTIFY_PREFIX = exports.EXPIRE_DURATION = exports.JSON_RPC_KEY = exports.JSON_RPC_VERSION = exports.NativeSDKGlobalKey = exports.TEST_API_KEY = exports.SDK_NAME = void 0;
 exports.SDK_NAME = 'MobileBridge';
+exports.TEST_API_KEY = 'API_TEST';
+exports.NativeSDKGlobalKey = 'MobileBridgeNative';
 exports.JSON_RPC_VERSION = '2.0';
 exports.JSON_RPC_KEY = 'jsonrpc';
 // 通信超时时间
@@ -882,16 +897,13 @@ exports.RES_CODE = {
 /***/ }),
 
 /***/ 275:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getAllUserAgent = exports.isIframeEnv = exports.isResponse = exports.isRequest = exports.isNotify = void 0;
-function isNotify(message) {
-    return true;
-}
-exports.isNotify = isNotify;
+exports.getAllUserAgent = exports.isIframeEnv = exports.isResponse = exports.isNotify = exports.isRequest = void 0;
+var constant_1 = __webpack_require__(807);
 function isRequest(msgObj) {
     var requestKeys = ['jsonrpc', 'id', 'method', 'params'];
     // 检查是否符合所有的 IRequest Key
@@ -900,6 +912,15 @@ function isRequest(msgObj) {
     });
 }
 exports.isRequest = isRequest;
+function isNotify(msgObj) {
+    var notifyKeys = ['jsonrpc', 'id', 'data'];
+    // 检查是否符合所有的 IRequest Key
+    var allKeys = notifyKeys.every(function (requestKey) {
+        return msgObj.hasOwnProperty(requestKey);
+    });
+    return allKeys && msgObj.id === constant_1.NOTIFY_PREFIX;
+}
+exports.isNotify = isNotify;
 function isResponse(msgObj) {
     var responseKeys = ['jsonrpc', 'id', 'errCode'];
     // 检查是否符合所有的 IRequest Key
@@ -939,8 +960,12 @@ var __webpack_unused_export__;
 
 __webpack_unused_export__ = ({ value: true });
 var MobileBridge_1 = __webpack_require__(4);
-var mobileBridge = new MobileBridge_1.default();
-exports.default = mobileBridge;
+var constant_1 = __webpack_require__(807);
+var api_1 = __webpack_require__(49);
+// 绑定到全局
+window[constant_1.SDK_NAME] = MobileBridge_1.default;
+window[constant_1.TEST_API_KEY] = api_1.default;
+exports.default = MobileBridge_1.default;
 
 
 /***/ }),

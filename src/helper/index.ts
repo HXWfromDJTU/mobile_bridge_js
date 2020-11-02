@@ -1,6 +1,4 @@
-export function isNotify (message: Object): boolean {
-  return true
-}
+import {NOTIFY_PREFIX} from '../constant'
 
 export function isRequest (msgObj: any): boolean {
   const requestKeys = ['jsonrpc', 'id', 'method', 'params']
@@ -9,6 +7,17 @@ export function isRequest (msgObj: any): boolean {
   return requestKeys.every((requestKey: string) => {
     return  msgObj.hasOwnProperty(requestKey)
   })
+}
+
+export function isNotify (msgObj: any): boolean {
+  const notifyKeys = ['jsonrpc', 'id', 'data']
+
+  // 检查是否符合所有的 IRequest Key
+  const allKeys = notifyKeys.every((requestKey: string) => {
+    return  msgObj.hasOwnProperty(requestKey)
+  })
+
+  return allKeys && msgObj.id === NOTIFY_PREFIX
 }
 
 export function isResponse (msgObj: any): boolean {

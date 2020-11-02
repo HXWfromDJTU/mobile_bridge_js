@@ -1,6 +1,6 @@
 import TestModule from './TestModule'
-import mobileBridge from '../index'
-
-export {
-  TestModule
+const API = {
+  testApi: TestModule
 }
+
+export default API

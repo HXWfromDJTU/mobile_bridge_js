@@ -12,6 +12,13 @@
 * eventEmitter
 * 异常类型的封装、参数错误抛出的异常
    * 错误码设计
+   
+* otherWindow 要注意，是指被发送消息的窗口 
+
+## 设计模式
+* 一发一收    
+* 一发多收(发布订阅)     
+* 不订阅，也主动推送。(双向都可)
 
 ## 图例
 * 参考了同事 `electron`的多窗口、跨进程通信的设计思维    
@@ -21,6 +28,10 @@
 * Iframe 的特性，当下的用途在哪里？如何判断当前页面是否处于Iframe之中
 * postMessage
 * window.top window.self
+
+## 客户端API
+* ios 端 如何进行 messagerHandler 的绑定
+* android 如何进行 postMessage的绑定
 
 ### 工具
 * log-level
@@ -34,6 +45,7 @@
 
 ### 测试模块
 * dev测试
+* 可视化测试页面的搭建
 
 ## 参考资料
 [1] [window.postMessage - MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage)      
