@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Mobile Bridge Test</title>
+  <style>
+    #container-page {
+      border: 1px solid green;
+      height: 1000px;
+      width: 100%;
+      padding: 5%;
+    }
+    #sub-iframe {
+      width: 80%;
+      height: 700px;
+    }
+
+    .mgb-30 {
+      margin-bottom: 30px;
+    }
+
+    .row {
+      padding: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="container-page">
+    <div class="home-container">
+      <h1>Native(parent)-page</h1>
+      <div class="row mgb-30">
+        <button @click="sendNotify">向 Iframe 发送 Notify</button>
+        <button @click="clear">clear</button>
+      </div>
+      <div class="row mgb-30">
+        接收缓冲区:
+        <div v-text="receivedData"></div>
+      </div>
+      <div class="row mgb-30">
+        发送缓冲区:
+        <div v-text="sendingData"></div>
+      </div>
+    </div>
+    <iframe id="sub-iframe" src="./iframe.html" frameborder="0"></iframe>
+  </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript">
+  new Vue({
+    el: '#container-page',
+    data () {
+      return {
+        isNotify: false,
+        receivedData: '',
+        sendingData: '',
+      }
+    },
+    mounted () {
+      window['MobileBridgeNative'] = window.frames[0]
+      // 用 web 模拟客户端接收消息
+      window.addEventListener('message', event => {
+        // 确认消息格式
+        if (event.data && event.data && event.data['jsonrpc'] === '2.0') {
+          console.log('container-page received:', event.data)
+          this.receivedData = event.data
+          // todo: 收到消息后，处理消息
+          this.sendFeedbackMessage(event.data.id)
+        }
+      })
+    },
+    methods: {
+      sendFeedbackMessage (id) {
+        const dataString = JSON.stringify({
+          id: id,
+          jsonrpc: '2.0',
+          data: {
+            key: 'responseData'
+          },
+          errCode: 0,
+          errMsg: ''
+        })
+        this.sendingData = dataString
+        // 模仿客户端强制执行JavaScript代码
+        window['MobileBridgeNative'].eval(`
+          window.postMessage(\`${dataString}\`)
+        `)
+      },
+      sendNotify () {
+        const dataString = JSON.stringify({
+          id: 'notify',
+          jsonrpc: '2.0',
+          data: {
+            timestamp: new Date().getTime(),
+            key: '来自 Native(parent) 的消息通知'
+          },
+        })
+        this.sendingData = dataString
+        // 模仿客户端强制执行JavaScript代码
+        window['MobileBridgeNative'].eval(`
+          window.postMessage(\`${dataString}\`)
+        `)
+      },
+      clear () {
+        this.receivedData = ''
+        this.sendingData = ''
+      }
+    }
+  })
+
+</script>
+</html>

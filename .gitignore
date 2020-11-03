@@ -20,7 +20,7 @@ yarn-error.log*
 !.gitkeep
 
 # Project
-dist/
+#dist/
 .env
 yarn.lock
 package-lock.json
