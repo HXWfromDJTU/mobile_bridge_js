@@ -39,8 +39,8 @@ export class NativeChannel implements IChannel {
     else if (this.isIOS) {
       this.logger.debug(`${SDK_NAME}-NativeChannel iOS send message`, data)
 
-      if (window.webkit?.messageHandlers?.[this.useChannelName]?.postMessage) {
-        window.webkit.messageHandlers[this.useChannelName].postMessage(data)
+      if ((window as any).webkit?.messageHandlers?.[this.useChannelName]?.postMessage) {
+        (window as any).webkit.messageHandlers[this.useChannelName].postMessage(data)
       }
       else {
         this.logger.error(`${ SDK_NAME }-NativeChannel iOS: bridge not found in messageHandlers, name =`, this.useChannelName)

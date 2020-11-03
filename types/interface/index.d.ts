@@ -20,3 +20,6 @@ export interface IRequest extends IMessage {
     method: string;
     params: any;
 }
+export interface INotify extends IMessage {
+    data: any;
+}

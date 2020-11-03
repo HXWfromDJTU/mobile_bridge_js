@@ -1,5 +1,5 @@
 import TestModule from './TestModule';
-declare const _default: {
-    TestModule: typeof TestModule;
+declare const API: {
+    testApi: typeof TestModule;
 };
-export default _default;
+export default API;
