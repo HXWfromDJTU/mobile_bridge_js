@@ -10,7 +10,6 @@ export default class MobileBridge extends EventEmitter {
         super();
         this.logger = window.console;
         this._promises = new Map();
-        window[SDK_NAME] = this;
         this.apiDict = apiDict ? apiDict : {};
         // 初始化信道
         if (isIframeEnv()) {

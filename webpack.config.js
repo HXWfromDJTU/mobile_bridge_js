@@ -48,16 +48,16 @@ module.exports = function (env = {}, argv) {
         WEB_RUNTIME: JSON.stringify(true)
       }),
       new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, 'template', 'iframe.html'),
+        template: path.resolve(__dirname, 'template', 'app.html'),
         inject: true,
         minify: false,
-        filename: path.resolve(__dirname, 'dist/umd', 'iframe.html'),
+        filename: path.resolve(__dirname, 'dist/umd', 'app.html'),
       }),
       new HtmlWebpackPlugin({
-        template: path.resolve(__dirname, 'template', 'index.html'),
+        template: path.resolve(__dirname, 'template', 'app_in_iframe.html'),
         inject: false,
         minify: false,
-        filename:path.resolve(__dirname, 'dist/umd', 'index.html'),
+        filename:path.resolve(__dirname, 'dist/umd', 'app_in_iframe.html'),
       }),
     ],
     devtool: false,

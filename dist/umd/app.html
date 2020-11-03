@@ -27,7 +27,7 @@
 </head>
 <body>
 <div id="iframe">
-  <h2>Iframe</h2>
+  <h2>App</h2>
   <div class="row">
     method: <input type="text" v-model="method" placeholder="method">
   </div>
@@ -49,14 +49,11 @@
     <div v-text="sendingData"></div>
   </div>
 </div>
-</body>
+<script src="mobile_bridge_js.umd.min.js"></script></body>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
   // 使用模拟 api 初始化 bridge
   const mobileBridge = new window.MobileBridge(window['API_TEST'])
-
-  // 发送消息
-  console.log('window.MobileBridge', window.MobileBridge)
 
   new Vue({
     el: '#iframe',
@@ -70,6 +67,7 @@
       }
     },
     mounted () {
+      // 监听纯通知
       mobileBridge.on('notify', data => {
         this.receivedData = data
       })

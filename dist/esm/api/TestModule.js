@@ -6,10 +6,4 @@ export default class TestModule extends BaseAPI {
             params: {}
         });
     }
-    getAddressFromAddressBook() {
-        return this._request({
-            method: 'getAddressFromAddressBook',
-            params: {}
-        });
-    }
 }

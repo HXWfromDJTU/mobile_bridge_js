@@ -556,7 +556,6 @@ var MobileBridge = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.logger = window.console;
         _this._promises = new Map();
-        window[constant_1.SDK_NAME] = _this;
         _this.apiDict = apiDict ? apiDict : {};
         // 初始化信道
         if (helper_1.isIframeEnv()) {
@@ -749,12 +748,6 @@ var TestModule = /** @class */ (function (_super) {
     TestModule.prototype.sendTestMessage = function () {
         return this._request({
             method: 'test_method',
-            params: {}
-        });
-    };
-    TestModule.prototype.getAddressFromAddressBook = function () {
-        return this._request({
-            method: 'getAddressFromAddressBook',
             params: {}
         });
     };

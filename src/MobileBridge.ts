@@ -27,7 +27,7 @@ export default class MobileBridge extends EventEmitter {
 
   constructor(apiDict: ApiDict) {
     super()
-    window[SDK_NAME] = this
+
     this.apiDict = apiDict ? apiDict : {}
 
     // 初始化信道
