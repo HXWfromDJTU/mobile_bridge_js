@@ -1,4 +1,4 @@
-import {NOTIFY_PREFIX} from '../constant'
+import { NOTIFY_PREFIX } from '../constant'
 
 export function isRequest (msgObj: any): boolean {
   const requestKeys = ['jsonrpc', 'id', 'method', 'params']

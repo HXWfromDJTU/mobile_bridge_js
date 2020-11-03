@@ -9,7 +9,7 @@
 import MobileBridge from 'mobile_bridge_js'
 
 // cjs
-const MobileBridge = require('mobile_bridge_js')
+const MobileBridge = require('mobile_bridge_js').default
 ```
 ```html
 // static

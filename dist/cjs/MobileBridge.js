@@ -6,13 +6,11 @@ const helper_1 = require("./helper");
 const constant_1 = require("./constant");
 const rescode_1 = require("./constant/rescode");
 const NativeChannel_1 = require("./channel/NativeChannel");
-const pkg = require('../package.json');
 const uniqueId = require('lodash.uniqueid');
 class MobileBridge extends EventEmitter {
     constructor(apiDict) {
         super();
         this.logger = window.console;
-        this.version = pkg.version;
         this._promises = new Map();
         window[constant_1.SDK_NAME] = this;
         this.apiDict = apiDict ? apiDict : {};

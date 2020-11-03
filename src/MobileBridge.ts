@@ -15,12 +15,10 @@ import {
 import { RES_CODE } from './constant/rescode'
 import { NativeChannel } from './channel/NativeChannel'
 import { ApiDict } from './types'
-const pkg = require('../package.json')
 const uniqueId = require('lodash.uniqueid')
 
 export default class MobileBridge extends EventEmitter {
   public logger: any = window.console
-  public version = pkg.version
   public apiDict: ApiDict
 
   protected _channel: IChannel

@@ -4,7 +4,6 @@ import { IPromise } from './interface';
 import { ApiDict } from './types';
 export default class MobileBridge extends EventEmitter {
     logger: any;
-    version: any;
     apiDict: ApiDict;
     protected _channel: IChannel;
     protected _promises: Map<string, IPromise>;

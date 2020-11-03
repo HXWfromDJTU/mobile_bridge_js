@@ -4,13 +4,11 @@ import { isIframeEnv, isNotify, isRequest, isResponse } from './helper';
 import { EXPIRE_DURATION, HEARTBEAT_DURATION, JSON_RPC_KEY, JSON_RPC_VERSION, NativeSDKGlobalKey, NOTIFY_PREFIX, SDK_NAME } from './constant';
 import { RES_CODE } from './constant/rescode';
 import { NativeChannel } from './channel/NativeChannel';
-const pkg = require('../package.json');
 const uniqueId = require('lodash.uniqueid');
 export default class MobileBridge extends EventEmitter {
     constructor(apiDict) {
         super();
         this.logger = window.console;
-        this.version = pkg.version;
         this._promises = new Map();
         window[SDK_NAME] = this;
         this.apiDict = apiDict ? apiDict : {};

@@ -549,14 +549,12 @@ var helper_1 = __webpack_require__(275);
 var constant_1 = __webpack_require__(807);
 var rescode_1 = __webpack_require__(803);
 var NativeChannel_1 = __webpack_require__(6);
-var pkg = __webpack_require__(306);
 var uniqueId = __webpack_require__(970);
 var MobileBridge = /** @class */ (function (_super) {
     __extends(MobileBridge, _super);
     function MobileBridge(apiDict) {
         var _this = _super.call(this) || this;
         _this.logger = window.console;
-        _this.version = pkg.version;
         _this._promises = new Map();
         window[constant_1.SDK_NAME] = _this;
         _this.apiDict = apiDict ? apiDict : {};
@@ -968,14 +966,6 @@ window[constant_1.SDK_NAME] = MobileBridge_1.default;
 window[constant_1.TEST_API_KEY] = api_1.default;
 exports.default = MobileBridge_1.default;
 
-
-/***/ }),
-
-/***/ 306:
-/***/ ((module) => {
-
-"use strict";
-module.exports = JSON.parse("{\"name\":\"mobile_bridge_js\",\"version\":\"0.0.4\",\"description\":\"\",\"main\":\"./dist/cjs/index.js\",\"module\":\"./dist/esm/index.js\",\"dependencies\":{\"eventemitter3\":\"^4.0.7\",\"lodash.uniqueid\":\"^4.0.1\",\"loglevel\":\"^1.7.0\",\"webpack\":\"^5.3.2\"},\"devDependencies\":{\"eventemitter3\":\"^4.0.7\",\"html-webpack-plugin\":\"^4.5.0\",\"lodash.uniqueid\":\"^4.0.1\",\"open-browser-webpack-plugin\":\"^0.0.5\",\"ts-loader\":\"^8.0.7\",\"typescript\":\"^4.0.5\",\"webpack\":\"^5.3.0\",\"webpack-bundle-analyzer\":\"^3.9.0\",\"webpack-cli\":\"^4.1.0\",\"webpack-dev-server\":\"^3.11.0\",\"webpack-merge\":\"^5.3.0\"},\"scripts\":{\"test\":\"echo \\\"Error: no test specified\\\" && exit 1\",\"build\":\"npm run build:cjs && npm run build:esm && npm run build:umd\",\"build:umd\":\"webpack --mode=production --config webpack.config.js\",\"build:cjs\":\"tsc -p tsconfig.cjs.json\",\"build:esm\":\"tsc -p tsconfig.esm.json\",\"dev:test\":\"webpack serve --mode=development --config webpack.config.js --port=1024\"},\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/HXWfromDJTU/mobile_bridge_js.git\"},\"author\":\"\",\"license\":\"ISC\",\"bugs\":{\"url\":\"https://github.com/HXWfromDJTU/mobile_bridge_js/issues\"},\"homepage\":\"https://github.com/HXWfromDJTU/mobile_bridge_js#readme\"}");
 
 /***/ })
 
