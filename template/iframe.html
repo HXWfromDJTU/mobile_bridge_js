@@ -9,7 +9,19 @@
     #iframe {
       border: 1px solid pink;
       width: 90%;
-      height: 400px;
+      height: 700px;
+      padding: 0 20px;
+    }
+
+    .row {
+      padding: 8px 0;
+    }
+
+    .mgb-30 {
+      margin-bottom: 30px;
+    }
+    .mgb-15 {
+      margin-bottom: 30px;
     }
   </style>
 </head>
@@ -22,21 +34,20 @@
   <div class="row">
     dataString: <textarea v-model="dataString" placeholder="dataString"></textarea>
   </div>
-  <div class="row">
+  <div class="row mgb-30">
     <button @click="sendMessage">向 Native 发送 Request</button>
+    <button @click="sendTestMessage">testModule.sendTestMessage</button>
+    isNotify: <input type="checkbox" v-model="isNotify">
+    <button @click="clear">clear</button>
   </div>
-  <div class="row">
-    isNotify: <input type="radio" v-model="isNotify">
-  </div>
-  <button @click="sendTestMessage">testModule.sendTestMessage</button>
-
-  <div class="row">
+  <div class="row mgb-30">
     接收缓冲区:
     <div v-text="receivedData"></div>
+  </div>
+  <div class="row mgb-30">
     发送缓冲区:
     <div v-text="sendingData"></div>
   </div>
-  <button @click="clear">clear</button>
 </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

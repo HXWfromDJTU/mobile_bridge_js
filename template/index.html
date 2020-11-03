@@ -8,30 +8,42 @@
   <style>
     #container-page {
       border: 1px solid green;
-      height: 800px;
+      height: 1000px;
       width: 100%;
+      padding: 5%;
     }
     #sub-iframe {
       width: 80%;
-      height: 500px;
+      height: 700px;
+    }
+
+    .mgb-30 {
+      margin-bottom: 30px;
+    }
+
+    .row {
+      padding: 8px 0;
     }
   </style>
 </head>
 <body>
   <div id="container-page">
-    <h1>Native(parent)-page</h1>
-
-    <button @click="sendNotify">向 Iframe 发送 Notify</button>
-    <input type="radio" v-model="isNotify">
-    <iframe id="sub-iframe" src="./iframe.html" frameborder="0"></iframe>
-
-    <div class="row">
-      接收缓冲区:
-      <div v-text="receivedData"></div>
-      发送缓冲区:
-      <div v-text="sendingData"></div>
+    <div class="home-container">
+      <h1>Native(parent)-page</h1>
+      <div class="row mgb-30">
+        <button @click="sendNotify">向 Iframe 发送 Notify</button>
+        <button @click="clear">clear</button>
+      </div>
+      <div class="row mgb-30">
+        接收缓冲区:
+        <div v-text="receivedData"></div>
+      </div>
+      <div class="row mgb-30">
+        发送缓冲区:
+        <div v-text="sendingData"></div>
+      </div>
     </div>
-    <button @click="clear">clear</button>
+    <iframe id="sub-iframe" src="./iframe.html" frameborder="0"></iframe>
   </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>

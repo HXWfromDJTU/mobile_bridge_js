@@ -47,6 +47,8 @@
 * dev测试
 * 可视化测试页面的搭建
 
+![](/mobile_bridge_playground.png)
+
 ## 参考资料
 [1] [window.postMessage - MDN](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/postMessage)      
 [2] [logger-level - github](https://github.com/pimterry/loglevel)    
