@@ -3,11 +3,11 @@
 thumbs.db
 
 # IDE & Editor
-.idea/*
+#.idea/*
 
 # Node
 coverage
-node_modules/
+#node_modules/
 logs
 *.log
 npm-debug.log*
@@ -20,7 +20,7 @@ yarn-error.log*
 !.gitkeep
 
 # Project
-dist/
+#dist/
 .env
 yarn.lock
 package-lock.json
