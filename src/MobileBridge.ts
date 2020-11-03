@@ -30,6 +30,7 @@ export default class MobileBridge extends EventEmitter {
   constructor(apiDict: ApiDict) {
     super()
     window[SDK_NAME] = this
+    this.apiDict = apiDict ? apiDict : {}
 
     // 初始化信道
     if (isIframeEnv()) {
@@ -57,9 +58,9 @@ export default class MobileBridge extends EventEmitter {
     }
 
     // 绑定 API_DICT 实例到 Bridge 上
-    for (const key of Object.keys(apiDict)) {
+    for (const key of Object.keys(this.apiDict)) {
       // 实例化api, 并使用 MobileBridge 作为信道，并绑定到全局
-      this[key] = new apiDict[key](this)
+      this[key] = new this.apiDict[key](this)
     }
 
     // 添加请求 RTT 过长警告  todo: 清理计时器
