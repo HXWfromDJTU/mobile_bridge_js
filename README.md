@@ -1,5 +1,6 @@
 # mobile_bridge_js 
-[![npm version](https://badge.fury.io/js/mobile_bridge_js.svg)](//npmjs.com/package/mobile_bridge_js)
+[![npm version](https://badge.fury.io/js/mobile_bridge_js.svg)](//npmjs.com/package/mobile_bridge_js)     
+
 `mobile_bridge_js` is a simple tool for Native and Javascript in Webview to communicate to each other.
 
 ### Import
@@ -90,3 +91,4 @@ $ npm run dev:test
 
 open localhost:1024/umd/index.html
 ```
+![](https://raw.githubusercontent.com/HXWfromDJTU/blog/master/blog_assets/mobile_bridge_playground.png)
