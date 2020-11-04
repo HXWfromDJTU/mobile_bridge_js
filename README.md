@@ -112,4 +112,3 @@ $ npm run dev:test
 
 open localhost:1024/umd/index.html
 ```
-![](https://raw.githubusercontent.com/HXWfromDJTU/blog/master/blog_assets/mobile_bridge_playground.png)
