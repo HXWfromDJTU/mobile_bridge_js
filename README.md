@@ -43,6 +43,11 @@ mobileBridge.on('notify', event => {
 #### Native
 Primary Key = `MobileBridgeNative`
 * iOS
+  ```js
+  window.webkit.messageHandlers.MobileBridgeBridge.postMessage({
+    // ......message body
+  })
+   ```
   ```c
   # receive message
   let webConfiguration = WKWebViewConfiguration()
@@ -65,6 +70,22 @@ Primary Key = `MobileBridgeNative`
     // handle errors accordingly
   });
   ```
+  
+* Android
+    ```js
+    window['MobileBridgeNative'].postMessage('message', '*')
+    ```
+    ```java
+    class Bridge {
+       @JavascriptInterface
+        public boolean postMessage(String json) {
+           parent.postMessage(json, "*")
+        }
+    }
+    
+    // And when initializing the webview... 
+    webView.addJavascriptInterface(new Bridge(), "MobileBridgeNative");
+    ```
 
 ### Build
 ```bat

@@ -24,11 +24,10 @@ export class NativeChannel implements IChannel {
   }
 
   postMessage (data: any): void {
-    this.logger.debug(`${SDK_NAME}-NativeChannel send message`, data)
-
     if (this.isAndroid) {
-      this.logger.debug(`${SDK_NAME}-NativeChannel Android send message`, data)
-      const bridge = window[this.useChannelName]
+      this.logger.debug(`${SDK_NAME}-try sending through Android NativeChannel`, data)
+
+      const bridge = window[this.useChannelName] // window[this.useChannelName] 指向的是 Android 端绑定的对象
 
       if (bridge && bridge.postMessage) {
         bridge.postMessage(data)
@@ -37,13 +36,21 @@ export class NativeChannel implements IChannel {
       }
     }
     else if (this.isIOS) {
-      this.logger.debug(`${SDK_NAME}-NativeChannel iOS send message`, data)
+      this.logger.debug(`${SDK_NAME}-try sending through iOS NativeChannel`, data)
 
       if ((window as any).webkit?.messageHandlers?.[this.useChannelName]?.postMessage) {
         (window as any).webkit.messageHandlers[this.useChannelName].postMessage(data)
       }
       else {
-        this.logger.error(`${ SDK_NAME }-NativeChannel iOS: bridge not found in messageHandlers, name =`, this.useChannelName)
+        // 使用新开页面的形式，客户端端通过约定的 schema，从URL中获取传递的参数
+        const iframe = document.createElement('iframe')
+        iframe.setAttribute('src', `mobile-bridge://${this.useChannelName}?data=${NativeChannel.dataToString(data)}`)
+        iframe.setAttribute('style', 'display: none')
+        document.body.appendChild(iframe)
+
+        setTimeout(() => {
+          document.body.removeChild(iframe)
+        }, 100)
       }
     }
     else {

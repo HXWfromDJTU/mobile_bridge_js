@@ -1,4 +1,5 @@
 export interface IChannel {
+  logger: any
   postMessage (data: any): void
 }
 
@@ -28,5 +29,6 @@ export interface IRequest extends IMessage {
 
 export interface INotify extends IMessage{
   data: any,
+  event: string,
 }
 

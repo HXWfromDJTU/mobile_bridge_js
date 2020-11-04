@@ -55,6 +55,25 @@
   // 使用模拟 api 初始化 bridge
   const mobileBridge = new window.MobileBridge(window['API_TEST'])
 
+
+  // 模拟 与 客户端商量好的一些通知类型
+  const MockNativeNotifyEvent = {
+    changeAccount: 'changeAccount',
+    changeBalance: 'changeBalance',
+    logout: 'logout'
+  }
+
+  // 监听客户端发送的事件
+  mobileBridge.on(`notify:${MockNativeNotifyEvent.changeAccount}`, data => {
+    console.log('H5 App Receive notify:', data)
+  })
+  mobileBridge.on(`notify:${MockNativeNotifyEvent.changeBalance}`, data => {
+    console.log('H5 App Receive notify:', data)
+  })
+  mobileBridge.on(`notify:${MockNativeNotifyEvent.logout}`, data => {
+    console.log('H5 App Receive notify:', data)
+  })
+
   new Vue({
     el: '#iframe',
     data () {

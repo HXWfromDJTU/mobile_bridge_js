@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Mobile Bridge Test</title>
   <style>
-    #container-page {
+    #wrapperpage {
       border: 1px solid green;
       height: 1000px;
       width: 100%;
@@ -27,7 +27,7 @@
   </style>
 </head>
 <body>
-  <div id="container-page">
+  <div id="wrapperpage">
     <div class="home-container">
       <h1>Wrapper</h1>
       <div class="row mgb-30">
@@ -44,7 +44,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script type="text/javascript">
   new Vue({
-    el: '#container-page',
+    el: '#wrapperpage',
     data () {
       return {
         isNotify: false,
@@ -57,7 +57,7 @@
       window.addEventListener('message', event => {
         // 确认消息格式
         if (event.data && event.data && event.data['jsonrpc'] === '2.0') {
-          console.log('container-page received:', event.data)
+          console.log('wrapperpage received:', event.data)
           this.receivedData = event.data
         }
       })

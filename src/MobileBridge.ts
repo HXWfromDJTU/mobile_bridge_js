@@ -18,7 +18,7 @@ import { ApiDict } from './types'
 const uniqueId = require('lodash.uniqueid')
 
 export default class MobileBridge extends EventEmitter {
-  public logger: any = window.console
+  public logger: any = LoggerLevel.getLogger(SDK_NAME)
   public apiDict: ApiDict
 
   protected _channel: IChannel
@@ -35,22 +35,24 @@ export default class MobileBridge extends EventEmitter {
       console.debug(`${SDK_NAME}.init: use IframeChannel`)
 
       // 发消息
-      this._channel = new IframeChannel()
+      this._channel = new IframeChannel(console)
 
       // 接收消息
       window.onmessage = (event: any): void => {
         this.logger.debug(`${SDK_NAME}-iframe-receive message, ready to handle`, event)
-        // 确认消息格式
+
         if (event.data
             && typeof event.data === 'string'
             && event.data.includes(`"${ JSON_RPC_KEY }":"${ JSON_RPC_VERSION }"`)) {
-          // todo: 收到消息后，处理消息
+
+          // 向子页面传递消息 (向下传递)
           this.response(event.data)
         }
       }
     }
     else {
       console.debug(`${SDK_NAME}.init: use NativeChannel`)
+
       // 使用 native channel 封装 各平台的 webview postMessage 的api
       this._channel = new NativeChannel(NativeSDKGlobalKey, console)
     }
@@ -73,10 +75,6 @@ export default class MobileBridge extends EventEmitter {
     }, HEARTBEAT_DURATION)
   }
 
-  /**
-   * response 起到的是 handleRequest 的作用, 可以是内部自动调用，也可以是使用者调用
-   * @param data 信道传输过来的 string 消息，期望是 IRequest 格式的 JSON_STRING
-   */
   response (data: string) {
     // 尝试转换为 JSON 格式消息
     let message: any
@@ -90,11 +88,11 @@ export default class MobileBridge extends EventEmitter {
     }
 
     if (isNotify(message)) {
-      const { id, data } = message
+      const { id, event } = message
 
-      this.logger.debug(`${SDK_NAME}: receive notify`, id)
+      this.logger.debug(`${SDK_NAME}: receive ${event} notify`, id)
       // 收到请求，使用事件机制对外暴露
-      this.emit(`${NOTIFY_PREFIX}`, data)
+      this.emit(`${NOTIFY_PREFIX}:${event}`, data)
       return
     }
 
@@ -171,7 +169,7 @@ export default class MobileBridge extends EventEmitter {
         })
       }
 
-      this.logger.debug(`${SDK_NAME}-request message send, payload =`, payload)
+      this.logger.debug(`${SDK_NAME}-request message will be sent, payload =`, payload)
       this._channel.postMessage(payload)
     })
   }

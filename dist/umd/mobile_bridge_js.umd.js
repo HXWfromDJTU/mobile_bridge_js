@@ -524,6 +524,287 @@ module.exports = uniqueId;
 
 /***/ }),
 
+/***/ 434:
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
+* loglevel - https://github.com/pimterry/loglevel
+*
+* Copyright (c) 2013 Tim Perry
+* Licensed under the MIT license.
+*/
+(function (root, definition) {
+    "use strict";
+    if (true) {
+        !(__WEBPACK_AMD_DEFINE_FACTORY__ = (definition),
+		__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+		(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+		__WEBPACK_AMD_DEFINE_FACTORY__),
+		__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+    } else {}
+}(this, function () {
+    "use strict";
+
+    // Slightly dubious tricks to cut down minimized file size
+    var noop = function() {};
+    var undefinedType = "undefined";
+    var isIE = (typeof window !== undefinedType) && (typeof window.navigator !== undefinedType) && (
+        /Trident\/|MSIE /.test(window.navigator.userAgent)
+    );
+
+    var logMethods = [
+        "trace",
+        "debug",
+        "info",
+        "warn",
+        "error"
+    ];
+
+    // Cross-browser bind equivalent that works at least back to IE6
+    function bindMethod(obj, methodName) {
+        var method = obj[methodName];
+        if (typeof method.bind === 'function') {
+            return method.bind(obj);
+        } else {
+            try {
+                return Function.prototype.bind.call(method, obj);
+            } catch (e) {
+                // Missing bind shim or IE8 + Modernizr, fallback to wrapping
+                return function() {
+                    return Function.prototype.apply.apply(method, [obj, arguments]);
+                };
+            }
+        }
+    }
+
+    // Trace() doesn't print the message in IE, so for that case we need to wrap it
+    function traceForIE() {
+        if (console.log) {
+            if (console.log.apply) {
+                console.log.apply(console, arguments);
+            } else {
+                // In old IE, native console methods themselves don't have apply().
+                Function.prototype.apply.apply(console.log, [console, arguments]);
+            }
+        }
+        if (console.trace) console.trace();
+    }
+
+    // Build the best logging method possible for this env
+    // Wherever possible we want to bind, not wrap, to preserve stack traces
+    function realMethod(methodName) {
+        if (methodName === 'debug') {
+            methodName = 'log';
+        }
+
+        if (typeof console === undefinedType) {
+            return false; // No method possible, for now - fixed later by enableLoggingWhenConsoleArrives
+        } else if (methodName === 'trace' && isIE) {
+            return traceForIE;
+        } else if (console[methodName] !== undefined) {
+            return bindMethod(console, methodName);
+        } else if (console.log !== undefined) {
+            return bindMethod(console, 'log');
+        } else {
+            return noop;
+        }
+    }
+
+    // These private functions always need `this` to be set properly
+
+    function replaceLoggingMethods(level, loggerName) {
+        /*jshint validthis:true */
+        for (var i = 0; i < logMethods.length; i++) {
+            var methodName = logMethods[i];
+            this[methodName] = (i < level) ?
+                noop :
+                this.methodFactory(methodName, level, loggerName);
+        }
+
+        // Define log.log as an alias for log.debug
+        this.log = this.debug;
+    }
+
+    // In old IE versions, the console isn't present until you first open it.
+    // We build realMethod() replacements here that regenerate logging methods
+    function enableLoggingWhenConsoleArrives(methodName, level, loggerName) {
+        return function () {
+            if (typeof console !== undefinedType) {
+                replaceLoggingMethods.call(this, level, loggerName);
+                this[methodName].apply(this, arguments);
+            }
+        };
+    }
+
+    // By default, we use closely bound real methods wherever possible, and
+    // otherwise we wait for a console to appear, and then try again.
+    function defaultMethodFactory(methodName, level, loggerName) {
+        /*jshint validthis:true */
+        return realMethod(methodName) ||
+               enableLoggingWhenConsoleArrives.apply(this, arguments);
+    }
+
+    function Logger(name, defaultLevel, factory) {
+      var self = this;
+      var currentLevel;
+
+      var storageKey = "loglevel";
+      if (typeof name === "string") {
+        storageKey += ":" + name;
+      } else if (typeof name === "symbol") {
+        storageKey = undefined;
+      }
+
+      function persistLevelIfPossible(levelNum) {
+          var levelName = (logMethods[levelNum] || 'silent').toUpperCase();
+
+          if (typeof window === undefinedType || !storageKey) return;
+
+          // Use localStorage if available
+          try {
+              window.localStorage[storageKey] = levelName;
+              return;
+          } catch (ignore) {}
+
+          // Use session cookie as fallback
+          try {
+              window.document.cookie =
+                encodeURIComponent(storageKey) + "=" + levelName + ";";
+          } catch (ignore) {}
+      }
+
+      function getPersistedLevel() {
+          var storedLevel;
+
+          if (typeof window === undefinedType || !storageKey) return;
+
+          try {
+              storedLevel = window.localStorage[storageKey];
+          } catch (ignore) {}
+
+          // Fallback to cookies if local storage gives us nothing
+          if (typeof storedLevel === undefinedType) {
+              try {
+                  var cookie = window.document.cookie;
+                  var location = cookie.indexOf(
+                      encodeURIComponent(storageKey) + "=");
+                  if (location !== -1) {
+                      storedLevel = /^([^;]+)/.exec(cookie.slice(location))[1];
+                  }
+              } catch (ignore) {}
+          }
+
+          // If the stored level is not valid, treat it as if nothing was stored.
+          if (self.levels[storedLevel] === undefined) {
+              storedLevel = undefined;
+          }
+
+          return storedLevel;
+      }
+
+      /*
+       *
+       * Public logger API - see https://github.com/pimterry/loglevel for details
+       *
+       */
+
+      self.name = name;
+
+      self.levels = { "TRACE": 0, "DEBUG": 1, "INFO": 2, "WARN": 3,
+          "ERROR": 4, "SILENT": 5};
+
+      self.methodFactory = factory || defaultMethodFactory;
+
+      self.getLevel = function () {
+          return currentLevel;
+      };
+
+      self.setLevel = function (level, persist) {
+          if (typeof level === "string" && self.levels[level.toUpperCase()] !== undefined) {
+              level = self.levels[level.toUpperCase()];
+          }
+          if (typeof level === "number" && level >= 0 && level <= self.levels.SILENT) {
+              currentLevel = level;
+              if (persist !== false) {  // defaults to true
+                  persistLevelIfPossible(level);
+              }
+              replaceLoggingMethods.call(self, level, name);
+              if (typeof console === undefinedType && level < self.levels.SILENT) {
+                  return "No console available for logging";
+              }
+          } else {
+              throw "log.setLevel() called with invalid level: " + level;
+          }
+      };
+
+      self.setDefaultLevel = function (level) {
+          if (!getPersistedLevel()) {
+              self.setLevel(level, false);
+          }
+      };
+
+      self.enableAll = function(persist) {
+          self.setLevel(self.levels.TRACE, persist);
+      };
+
+      self.disableAll = function(persist) {
+          self.setLevel(self.levels.SILENT, persist);
+      };
+
+      // Initialize with the right level
+      var initialLevel = getPersistedLevel();
+      if (initialLevel == null) {
+          initialLevel = defaultLevel == null ? "WARN" : defaultLevel;
+      }
+      self.setLevel(initialLevel, false);
+    }
+
+    /*
+     *
+     * Top-level API
+     *
+     */
+
+    var defaultLogger = new Logger();
+
+    var _loggersByName = {};
+    defaultLogger.getLogger = function getLogger(name) {
+        if ((typeof name !== "symbol" && typeof name !== "string") || name === "") {
+          throw new TypeError("You must supply a name when creating a logger.");
+        }
+
+        var logger = _loggersByName[name];
+        if (!logger) {
+          logger = _loggersByName[name] = new Logger(
+            name, defaultLogger.getLevel(), defaultLogger.methodFactory);
+        }
+        return logger;
+    };
+
+    // Grab the current global log variable in case of overwrite
+    var _log = (typeof window !== undefinedType) ? window.log : undefined;
+    defaultLogger.noConflict = function() {
+        if (typeof window !== undefinedType &&
+               window.log === defaultLogger) {
+            window.log = _log;
+        }
+
+        return defaultLogger;
+    };
+
+    defaultLogger.getLoggers = function getLoggers() {
+        return _loggersByName;
+    };
+
+    // ES6 default export, for compatibility
+    defaultLogger['default'] = defaultLogger;
+
+    return defaultLogger;
+}));
+
+
+/***/ }),
+
 /***/ 4:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -545,6 +826,7 @@ var __extends = (this && this.__extends) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var EventEmitter = __webpack_require__(666);
 var IframeChannel_1 = __webpack_require__(312);
+var LoggerLevel = __webpack_require__(434);
 var helper_1 = __webpack_require__(275);
 var constant_1 = __webpack_require__(807);
 var rescode_1 = __webpack_require__(803);
@@ -554,22 +836,21 @@ var MobileBridge = /** @class */ (function (_super) {
     __extends(MobileBridge, _super);
     function MobileBridge(apiDict) {
         var _this = _super.call(this) || this;
-        _this.logger = window.console;
+        _this.logger = LoggerLevel.getLogger(constant_1.SDK_NAME);
         _this._promises = new Map();
         _this.apiDict = apiDict ? apiDict : {};
         // 初始化信道
         if (helper_1.isIframeEnv()) {
             console.debug(constant_1.SDK_NAME + ".init: use IframeChannel");
             // 发消息
-            _this._channel = new IframeChannel_1.IframeChannel();
+            _this._channel = new IframeChannel_1.IframeChannel(console);
             // 接收消息
             window.onmessage = function (event) {
                 _this.logger.debug(constant_1.SDK_NAME + "-iframe-receive message, ready to handle", event);
-                // 确认消息格式
                 if (event.data
                     && typeof event.data === 'string'
                     && event.data.includes("\"" + constant_1.JSON_RPC_KEY + "\":\"" + constant_1.JSON_RPC_VERSION + "\"")) {
-                    // todo: 收到消息后，处理消息
+                    // 向子页面传递消息 (向下传递)
                     _this.response(event.data);
                 }
             };
@@ -597,10 +878,6 @@ var MobileBridge = /** @class */ (function (_super) {
         }, constant_1.HEARTBEAT_DURATION);
         return _this;
     }
-    /**
-     * response 起到的是 handleRequest 的作用, 可以是内部自动调用，也可以是使用者调用
-     * @param data 信道传输过来的 string 消息，期望是 IRequest 格式的 JSON_STRING
-     */
     MobileBridge.prototype.response = function (data) {
         // 尝试转换为 JSON 格式消息
         var message;
@@ -613,10 +890,10 @@ var MobileBridge = /** @class */ (function (_super) {
             return;
         }
         if (helper_1.isNotify(message)) {
-            var id = message.id, data_1 = message.data;
-            this.logger.debug(constant_1.SDK_NAME + ": receive notify", id);
+            var id = message.id, event = message.event;
+            this.logger.debug(constant_1.SDK_NAME + ": receive " + event + " notify", id);
             // 收到请求，使用事件机制对外暴露
-            this.emit("" + constant_1.NOTIFY_PREFIX, data_1);
+            this.emit(constant_1.NOTIFY_PREFIX + ":" + event, data);
             return;
         }
         // 该消息为 请求类型 的消息
@@ -629,7 +906,7 @@ var MobileBridge = /** @class */ (function (_super) {
         }
         // 该消息为 响应类型 的消息
         if (helper_1.isResponse(message)) {
-            var id = message.id, errCode = message.errCode, data_2 = message.data, errMsg = message.errMsg;
+            var id = message.id, errCode = message.errCode, data_1 = message.data, errMsg = message.errMsg;
             // 从请求记录中，找到请求时设定的promise处理
             var callbackPromise = this._promises.get(id);
             if (callbackPromise) {
@@ -643,9 +920,9 @@ var MobileBridge = /** @class */ (function (_super) {
                 this.logger.debug(constant_1.SDK_NAME + "-response, remove callback promise, id = " + id);
                 // 执行对应的callback promise
                 if (errCode === rescode_1.RES_CODE.success) {
-                    this.logger.debug(constant_1.SDK_NAME + "-response: response data", data_2);
+                    this.logger.debug(constant_1.SDK_NAME + "-response: response data", data_1);
                     // 调用 reject 方法处理异常回复
-                    callbackPromise.resolve.call(this, data_2);
+                    callbackPromise.resolve.call(this, data_1);
                 }
                 else {
                     this.logger.debug(constant_1.SDK_NAME + "-response: received error", errMsg);
@@ -687,7 +964,7 @@ var MobileBridge = /** @class */ (function (_super) {
                     createdAt: new Date(),
                 });
             }
-            _this.logger.debug(constant_1.SDK_NAME + "-request message send, payload =", payload);
+            _this.logger.debug(constant_1.SDK_NAME + "-request message will be sent, payload =", payload);
             _this._channel.postMessage(payload);
         });
     };
@@ -774,16 +1051,20 @@ exports.default = API;
 /***/ }),
 
 /***/ 312:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IframeChannel = void 0;
+var constant_1 = __webpack_require__(807);
 var IframeChannel = /** @class */ (function () {
-    function IframeChannel() {
+    function IframeChannel(logger) {
+        this.logger = logger;
     }
     IframeChannel.prototype.postMessage = function (data) {
+        this.logger.debug(constant_1.SDK_NAME + "-try sending through IframeChannel");
+        // 将消息向父容器转发过去 (向外层传递)
         window.parent.postMessage(data, '*'); // 不限制接收源
     };
     return IframeChannel;
@@ -819,10 +1100,9 @@ var NativeChannel = /** @class */ (function () {
     }
     NativeChannel.prototype.postMessage = function (data) {
         var _a, _b, _c;
-        this.logger.debug(constant_1.SDK_NAME + "-NativeChannel send message", data);
         if (this.isAndroid) {
-            this.logger.debug(constant_1.SDK_NAME + "-NativeChannel Android send message", data);
-            var bridge = window[this.useChannelName];
+            this.logger.debug(constant_1.SDK_NAME + "-try sending through Android NativeChannel", data);
+            var bridge = window[this.useChannelName]; // window[this.useChannelName] 指向的是 Android 端绑定的对象
             if (bridge && bridge.postMessage) {
                 bridge.postMessage(data);
             }
@@ -831,12 +1111,19 @@ var NativeChannel = /** @class */ (function () {
             }
         }
         else if (this.isIOS) {
-            this.logger.debug(constant_1.SDK_NAME + "-NativeChannel iOS send message", data);
+            this.logger.debug(constant_1.SDK_NAME + "-try sending through iOS NativeChannel", data);
             if ((_c = (_b = (_a = window.webkit) === null || _a === void 0 ? void 0 : _a.messageHandlers) === null || _b === void 0 ? void 0 : _b[this.useChannelName]) === null || _c === void 0 ? void 0 : _c.postMessage) {
                 window.webkit.messageHandlers[this.useChannelName].postMessage(data);
             }
             else {
-                this.logger.error(constant_1.SDK_NAME + "-NativeChannel iOS: bridge not found in messageHandlers, name =", this.useChannelName);
+                // 使用新开页面的形式，客户端端通过约定的 schema，从URL中获取传递的参数
+                var iframe_1 = document.createElement('iframe');
+                iframe_1.setAttribute('src', "mobile-bridge://" + this.useChannelName + "?data=" + NativeChannel.dataToString(data));
+                iframe_1.setAttribute('style', 'display: none');
+                document.body.appendChild(iframe_1);
+                setTimeout(function () {
+                    document.body.removeChild(iframe_1);
+                }, 100);
             }
         }
         else {
@@ -889,13 +1176,12 @@ exports.RES_CODE = {
 /***/ }),
 
 /***/ 275:
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getAllUserAgent = exports.isIframeEnv = exports.isResponse = exports.isNotify = exports.isRequest = void 0;
-var constant_1 = __webpack_require__(807);
 function isRequest(msgObj) {
     var requestKeys = ['jsonrpc', 'id', 'method', 'params'];
     // 检查是否符合所有的 IRequest Key
@@ -905,12 +1191,11 @@ function isRequest(msgObj) {
 }
 exports.isRequest = isRequest;
 function isNotify(msgObj) {
-    var notifyKeys = ['jsonrpc', 'id', 'data'];
+    var notifyKeys = ['jsonrpc', 'id', 'event'];
     // 检查是否符合所有的 IRequest Key
-    var allKeys = notifyKeys.every(function (requestKey) {
+    return notifyKeys.every(function (requestKey) {
         return msgObj.hasOwnProperty(requestKey);
     });
-    return allKeys && msgObj.id === constant_1.NOTIFY_PREFIX;
 }
 exports.isNotify = isNotify;
 function isResponse(msgObj) {
