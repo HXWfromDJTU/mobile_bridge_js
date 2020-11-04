@@ -110,5 +110,5 @@ $ npm run build:umd
 # dev serve
 $ npm run dev:test
 
-open localhost:1024/umd/index.html
+open localhost:1024/umd/app.html
 ```
